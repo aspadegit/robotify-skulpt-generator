@@ -1,6 +1,11 @@
 import './index.css';
 import {generateCode} from './codeGenerator.js';
 
+//TODO: test deleting and adding functions in different patterns
+//TODO: block empty functions saving?
+//TODO: deleting parameters
+//TODO: replacing special characters in names?
+
 const fileNameInput = document.getElementById("fileName");
 const projectNameInput = document.getElementById("projectName");
 const codeDisplay = document.getElementById("codeDisplay").firstChild;
@@ -22,6 +27,7 @@ var functionList = [];
 window.onload = function() 
 {
     document.getElementById("saveFunction").onclick = function() { saveFunction() };
+    document.getElementById("deleteFunctionBtn").onclick = function() { deleteFunction() };
     document.getElementById("editFunctionBtn").onclick = function() { editFunction() };
     document.getElementById("newFunctionBtn").onclick = function() { newFunction() };
     document.getElementById("addParamBtn").onclick = function() { addParameter() };
@@ -62,7 +68,9 @@ function saveFunction()
     }
 
     //update generated code
-    console.log(newFunction);
+    functionList.push(newFunction);
+    updateGeneratedCode();
+
 }
 
 function editFunction()
@@ -95,6 +103,42 @@ function editFunction()
 
 }
 
+function newFunction()
+{
+    //say we're editing a new function
+    currentFunction.function = null;
+    currentFunction.index = -1;
+    currentParamList = [];
+
+    //clear everything
+    clearFunctionInfo();
+}
+
+//returns whether successfully deleted
+function deleteFunction()
+{
+    if(currentFunction.function === null)
+        return false;
+
+    let shouldDelete = confirm('Are you sure you want to delete ' + currentFunction.function.skulptName + '?');
+
+    if(shouldDelete)
+    {
+        functionDropdown.remove(functionDropdown.selectedIndex);
+        clearFunctionInfo();
+
+        functionList.splice(currentFunction.index,1);
+        updateGeneratedCode();
+
+        currentFunction.function = null;
+        currentFunction.index = -1;
+
+        return true;
+    }
+
+    return false;
+}
+
 function addParameter() 
 {
     currentParamList.push("");
@@ -123,10 +167,17 @@ function addParameter()
     return newParameterInput; //for use in other functions
 }
 
+function clearFunctionInfo()
+{
+    skulptNameInput.value = "";
+    severusNameInput.value = "";
+    typeDropdown.selectedIndex = 0;
+    paramListDiv.innerHTML = "";
+}
 
 //when the user types in a new file name, the code is updated
 const fileNameInputHandler = function(e) {
-    codeDisplay.innerHTML = e.target.value;
+    updateGeneratedCode();
 }
 
 fileNameInput.addEventListener('input', fileNameInputHandler);
@@ -160,5 +211,6 @@ const parameterInputHandler = function(e) {
 
 function updateGeneratedCode()
 {
+    currentCode = generateCode(fileNameInput.value, functionList);
     codeDisplay.innerHTML = currentCode;
 }
