@@ -22,10 +22,25 @@
 
 .functionAndParam {
     display:flex;
+
 }
 
 #generatedCode {
     flex-basis: 70%;
+
+}
+
+#paramList {
+    display:flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    max-height: 200px;
+
+}
+
+#parameterDiv{
+    max-height: 270px;
+    width: 40%;
 
 }
 

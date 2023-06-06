@@ -43,28 +43,32 @@
           <div class="genColumn">
             <h4>Choose an Existing Function</h4>
             <select id="functionDropdown" name="functionDropdown"></select>
+            <button id="editFunctionBtn">Edit</button>
             <h4>Create a New Function</h4>
-            <button>Add New Promise Function</button>
-            <br><br>
-            <button>Add New Return Function</button>
+            <button id="newFunctionBtn">New Function</button>
           </div>
 
-          <div class="genColumn">
+          <div class="genColumn functionDependent">
             <h4>Skulpt Function Name</h4>
-            <input type="text">
+            <input id="skulptNameInput" type="text">
             <h4>Severus Function Name</h4>
-            <input type="text">
-            </div>
+            <input id="severusNameInput" type="text">
+            <h4>Type</h4>
+            <select id="typeDropdown">
+              <option>Promise</option>
+              <option>Return</option>
+            </select>
 
-          <div class="genColumn">
-          <h4>Parameters</h4>
+          </div>
+
+          <div class="genColumn functionDependent" id="parameterDiv">
+            <h4>Parameters <button id="addParamBtn">Add New Parameter</button></h4>            
             <div id="paramList">
-              <label>Parameter 1: </label><input type="text">
-              <button>Add New Parameter</button>
             </div>
           </div>
 
           <div class="genColumn">
+            <button id="saveFunction">Save Function</button>
             <button>Delete This Function</button>
           </div>
         </div>
