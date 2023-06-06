@@ -1,0 +1,82 @@
+<!--
+  The HTML code of the page
+  Every major section should have an id handled in index.js
+-->
+
+<!DOCTYPE html>
+
+ <html>
+   <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@200;300;400;500&family=Pathway+Gothic+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./index.css">
+    <meta charset="utf-8" />
+    <title>Skulpt Generator</title>
+    <script type="javascript" src="./src/index.js"></script>
+   </head>
+   <body>
+    <div id="pageContainer">
+        <div class="loadSave">
+          <button class="btnPadding">Load Skulpt File</button> <button class="btnPadding">Save/Generate Skulpt</button>
+        </div>
+        <hr>
+
+        <div class="mainGenerator">
+          <div class="genColumn" id="nameInput">
+            <div>
+              <h4>File Name</h4>
+              <input id="fileName" type="text">
+              <h4>Project Name</h4>
+              <input id="projectName" type="text">
+            </div>
+          </div>
+          <div class="genColumn" id="generatedCode">
+            <h4>Generated Code</h4>
+            <pre id="codeDisplay"><code>Default Text</code></pre>
+          </div>
+        </div>
+        <hr>
+
+        <div class="functionAndParam">
+
+          <div class="genColumn">
+            <h4>Choose an Existing Function</h4>
+            <select id="functionDropdown" name="functionDropdown"></select>
+            <h4>Create a New Function</h4>
+            <button>Add New Promise Function</button>
+            <br><br>
+            <button>Add New Return Function</button>
+          </div>
+
+          <div class="genColumn">
+            <h4>Skulpt Function Name</h4>
+            <input type="text">
+            <h4>Severus Function Name</h4>
+            <input type="text">
+            </div>
+
+          <div class="genColumn">
+          <h4>Parameters</h4>
+            <div id="paramList">
+              <label>Parameter 1: </label><input type="text">
+              <button>Add New Parameter</button>
+            </div>
+          </div>
+
+          <div class="genColumn">
+            <button>Delete This Function</button>
+          </div>
+        </div>
+
+        <hr>
+        <div class="documentation">
+          <h4>Command</h4>
+          <h4>Argument Description</h4>
+          <h4>Description</h4>
+          <h4>Example</h4>
+        </div>
+
+    </div>
+   </body>
+ </html>

@@ -1,0 +1,42 @@
+.pageContainer {
+    display:flex;
+}
+
+.loadSave {
+    text-align: center;
+    padding: 1em;
+}
+
+.btnPadding {
+    margin-left: 2em;
+    margin-right: 2em;
+}
+
+.mainGenerator {
+    display:flex;
+}
+
+.genColumn {
+    margin: 1em;
+}
+
+.functionAndParam {
+    display:flex;
+}
+
+#generatedCode {
+    flex-basis: 70%;
+
+}
+
+#nameInput {
+    flex: 0 0 20%;
+}
+
+#codeDisplay {
+    border-width: 2px;
+    border-style: solid;
+    border-color: lightgray;
+    padding: 1em;
+    min-height: 200px;
+}
