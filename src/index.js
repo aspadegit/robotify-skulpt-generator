@@ -13,12 +13,15 @@ const skulptNameInput = document.getElementById("skulptNameInput");
 const severusNameInput = document.getElementById("severusNameInput");
 const paramListDiv = document.getElementById("paramList");
 const typeDropdown = document.getElementById("typeDropdown");
+const argumentDescription = document.getElementById("argumentDescription");
+const commandText = document.getElementById("commandText");
 
 var currentCode = "";
 
 //current function & current parameter list (for editing a function)
 var currentFunction = { function: null, index: -1 };
-var currentParamList = [];
+var currentParamList = [];  // list of variable names (for easy access / codeGenerator)
+var currentParamData = [];  // list of {name, type, desc}
 
 //overall function list; for generating code
 var functionList = [];
@@ -42,6 +45,7 @@ function saveFunction()
         skulptName: skulptNameInput.value,
         severusName: severusNameInput.value,
         parameters: currentParamList,
+        parameterData: currentParamData,
         type: selectedType
     }
 
@@ -107,12 +111,19 @@ function editFunction()
 
     //remove all the parameters and then add them back
     paramListDiv.innerHTML = "";
+    argumentDescription.innerHTML = "";
     
     currentParamList = [];
+    currentParamData = [];
     for(let i = 0; i < selectedFunction.parameters.length; i++)
     {
         addParameter().value = selectedFunction.parameters[i];
     }
+
+    //update argument desc
+    currentParamData = selectedFunction.parameterData;
+    updateAllArgumentDesc();
+
     return true;
 
 }
@@ -155,6 +166,7 @@ function deleteFunction()
     return false;
 }
 
+//returns the parameter input field
 function addParameter() 
 {
     currentParamList.push("");
@@ -190,6 +202,8 @@ function addParameter()
     //append the div to the parameter list section
     paramListDiv.appendChild(newDiv);
 
+    addArgumentDescription(newIndex);
+
     return newParameterInput; //for use in other functions
 }
 
@@ -202,7 +216,12 @@ function deleteParameter(divToDelete, index)
     {
         //removes the div visually & programmatically
         paramListDiv.removeChild(divToDelete);
+        argumentDescription.removeChild(document.getElementById("argument"+index));
+
         currentParamList.splice(index, 1);
+        currentParamData.splice(index, 1);
+
+        updateAllArgumentDesc();
         
         //update all the remaining stuff that wasn't deleted
         for(let i = 0; i < currentParamList.length; i++)
@@ -227,6 +246,7 @@ function clearFunctionInfo()
     severusNameInput.value = "";
     typeDropdown.selectedIndex = 0;
     paramListDiv.innerHTML = "";
+    argumentDescription.innerHTML = "";
 }
 
 function hideFunctionInfo()
@@ -271,18 +291,90 @@ const parameterInputHandler = function(e) {
     if(currentParamList.length-1 < paramIndex)
     {
         currentParamList.push(e.target.value);
+        currentParamData.push({name:e.target.value, type:"", description:""})
     }
     //edit an existing value
     else
     {
-        currentParamList[paramIndex] = e.target.value;
+        currentParamList[paramIndex] = e.target.value; 
+        currentParamData[paramIndex].name = e.target.value; 
     }
+
+    //update argument description
+    updateArgumentDescByIndex(paramIndex);
+    //TODO: update command
+}
+
+//for when any type fields (argument desc) are updated
+const argumentTypeInputHandler = function(e) {
+    
+    let index = parseInt(e.target.id.substring(12));
+    currentParamData[index].type = e.target.value;
 
 }
 
+//for when any description fields  (in argument desc) are updated
+const argumentDescriptionInputHandler = function(e) {
+    let index = parseInt(e.target.id.substring(12));
+    currentParamData[index].description = e.target.value;
+}
+
+//returns the div with all the HTML elements inside of it
+function addArgumentDescription(index) 
+{
+    currentParamData.push({name:"", type:"", description:""});
+
+    var paramName = document.createElement("input");
+    paramName.setAttribute("disabled", true);
+    
+    var typeInput = document.createElement("input");
+    typeInput.setAttribute("placeholder", "Type (e.g. Number)");
+    typeInput.id = "argTypeInput"+index;
+    typeInput.addEventListener('input', argumentTypeInputHandler);
+    typeInput.addEventListener('propertychange', argumentTypeInputHandler); //IE8
+
+    var descInput = document.createElement("input");
+    descInput.setAttribute("placeholder", "Description of parameter");
+    descInput.id = "argDescInput"+index;
+    descInput.addEventListener('input', argumentDescriptionInputHandler);
+    descInput.addEventListener('propertychange', argumentDescriptionInputHandler); //IE8
+
+    var containerDiv = document.createElement("div");
+    containerDiv.appendChild(paramName);
+    containerDiv.appendChild(typeInput);
+    containerDiv.appendChild(descInput);
+
+    containerDiv.style.margin = "0.2em";
+    containerDiv.id = "argument" + index;
+
+    argumentDescription.appendChild(containerDiv);
+    return containerDiv;
+}
+
+function updateArgumentDescByIndex(index)
+{
+    let currentDiv = document.getElementById("argument"+index);
+    currentDiv.children[0].value = `<strong>${currentParamData[index].name}</strong>:`;
+    currentDiv.children[1].value = currentParamData[index].type;
+    currentDiv.children[2].value = currentParamData[index].description;
+}
+
+function updateAllArgumentDesc()
+{
+    for(let i = 0; i < argumentDescription.children.length; i++)
+    {
+        let currentDiv = argumentDescription.children[i];
+        currentDiv.id = "argument" + i;
+        currentDiv.children[0].value = `<strong>${currentParamData[i].name}</strong>:`;
+        currentDiv.children[1].value = currentParamData[i].type;
+        currentDiv.children[2].value = currentParamData[i].description;
+    
+    }
+}
 
 function updateGeneratedCode()
 {
+
     currentCode = generateCode(fileNameInput.value, functionList);
     codeDisplay.innerHTML = currentCode;
 }
