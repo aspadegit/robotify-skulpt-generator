@@ -60,3 +60,9 @@
     min-width: 400px;
     max-height: 300px;
 }
+
+#commandDescExampleColumn {
+    max-width: 500px;
+    overflow-x:scroll;
+
+}

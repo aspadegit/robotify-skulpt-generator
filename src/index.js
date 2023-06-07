@@ -4,6 +4,10 @@ import {generateCode} from './codeGenerator.js';
 //TODO: test deleting and adding functions in different patterns
 //TODO: block empty functions saving?
 //TODO: replacing special characters in names?
+//TODO: make current function actually respond. to being a current function
+    // currently only updates current function on save
+    // will need input handlers
+    // also TODO: revisit deleting a function after doing this
 
 const fileNameInput = document.getElementById("fileName");
 const projectNameInput = document.getElementById("projectName");
@@ -15,6 +19,7 @@ const paramListDiv = document.getElementById("paramList");
 const typeDropdown = document.getElementById("typeDropdown");
 const argumentDescription = document.getElementById("argumentDescription");
 const commandText = document.getElementById("commandText");
+const exampleText = document.getElementById("exampleText");
 
 var currentCode = "";
 
@@ -144,6 +149,11 @@ function newFunction()
 //returns whether successfully deleted
 function deleteFunction()
 {
+    if(functionDropdown.options.length < 1)
+        return false;
+    
+    currentFunction.function = JSON.parse(functionDropdown.options[functionDropdown.selectedIndex].value);
+
     if(currentFunction.function === null)
         return false;
 
@@ -154,12 +164,13 @@ function deleteFunction()
         functionDropdown.remove(functionDropdown.selectedIndex);
         clearFunctionInfo();
 
-        functionList.splice(currentFunction.index,1);
+        functionList.splice(functionDropdown.selectedIndex,1);
         updateGeneratedCode();
 
         currentFunction.function = null;
         currentFunction.index = -1;
 
+        hideFunctionInfo();
         return true;
     }
 
@@ -203,6 +214,8 @@ function addParameter()
     paramListDiv.appendChild(newDiv);
 
     addArgumentDescription(newIndex);
+    updateExample();
+    updateCommandText();
 
     return newParameterInput; //for use in other functions
 }
@@ -269,6 +282,7 @@ function showFunctionInfo()
 
 //when the user types in a new file name, the code is updated
 const fileNameInputHandler = function(e) {
+    updateCommandText();
     updateGeneratedCode();
 }
 
@@ -282,6 +296,13 @@ const projectNameInputHandler = function(e) {
 }
 projectNameInput.addEventListener('input', projectNameInputHandler);
 projectNameInput.addEventListener('propertychange', projectNameInputHandler); //IE8
+
+const skulptNameInputHandler = function(e) {
+    updateCommandText();
+    updateExample();
+}
+skulptNameInput.addEventListener('input', skulptNameInputHandler);
+skulptNameInput.addEventListener('propertychange', skulptNameInputHandler); //IE8
 
 //for when any of the parameters are updated
 const parameterInputHandler = function(e) {
@@ -302,7 +323,8 @@ const parameterInputHandler = function(e) {
 
     //update argument description
     updateArgumentDescByIndex(paramIndex);
-    //TODO: update command
+    updateCommandText();
+
 }
 
 //for when any type fields (argument desc) are updated
@@ -370,6 +392,51 @@ function updateAllArgumentDesc()
         currentDiv.children[2].value = currentParamData[i].description;
     
     }
+}
+
+function updateCommandText()
+{
+    let name = fileNameInput.value;
+    let skulptName = skulptNameInput.value;
+
+    let text = name + "." + skulptName + "(";
+
+    for(let i = 0; i < currentParamList.length; i++)
+    {
+        text += currentParamList[i] + ", ";
+    }
+
+    //cut off comma
+    if(currentParamList.length > 0)
+        text = text.substring(0, text.length-2);
+    text += ")";
+    
+    commandText.innerHTML = text;
+
+}
+
+function updateExample()
+{
+    let name = fileNameInput.value;
+    let skulptName = skulptNameInput.value;
+
+    let text = name + "." + skulptName + "(";
+    exampleText.innerText = text;
+
+    for(let i = 0; i < currentParamList.length; i++)
+    {
+        let newInput = document.createElement("input");
+        //newInput.style.width = "width:100%;margin:-3px;border:2px inset #eee";
+        newInput.setAttribute("size", "5");
+
+        exampleText.appendChild(newInput);
+
+        if(i != currentParamList.length-1)
+            exampleText.appendChild(document.createTextNode(","));
+    }
+
+    exampleText.appendChild(document.createTextNode(")"));
+
 }
 
 function updateGeneratedCode()
