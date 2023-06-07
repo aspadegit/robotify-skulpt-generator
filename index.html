@@ -30,26 +30,29 @@
               <h4>Project Name</h4>
               <input id="projectName" type="text">
             </div>
+
+            <br><hr>
+            <div>
+              <h4>Choose an Existing Function</h4>
+              <select id="functionDropdown" name="functionDropdown"></select>
+              <br><br>
+              <button id="editFunctionBtn">Edit</button>
+              <button id="deleteFunctionBtn">Delete</button>
+  
+              <h4>Create a New Function</h4>
+              <button id="newFunctionBtn">New Function</button>
+            </div>
           </div>
           <div class="genColumn" id="generatedCode">
             <h4>Generated Code</h4>
             <pre id="codeDisplay"><code>Default Text</code></pre>
           </div>
         </div>
+
+        
         <hr>
 
         <div class="functionAndParam">
-
-          <div class="genColumn">
-            <h4>Choose an Existing Function</h4>
-            <select id="functionDropdown" name="functionDropdown"></select>
-            <br><br>
-            <button id="editFunctionBtn">Edit</button>
-            <button id="deleteFunctionBtn">Delete</button>
-
-            <h4>Create a New Function</h4>
-            <button id="newFunctionBtn">New Function</button>
-          </div>
 
           <div class="genColumn functionDependent">
             <h4>Skulpt Function Name</h4>
@@ -62,6 +65,8 @@
               <option>Return</option>
             </select>
 
+            <br><br>           
+
           </div>
 
           <div class="genColumn functionDependent" id="parameterDiv">
@@ -69,18 +74,36 @@
             <div id="paramList">
             </div>
           </div>
+          
+          <div class="genColumn functionDependent">
+              <h4>Argument Description</h4>
+              <p id="noParameters">No parameters for this function</p>
+              <div id="argumentDescription">
+                <div>
+                  <input type="text" value ="default parameter name" disabled>
+                  <input type="text" placeholder="Type (e.g. Number)">
+                  <input type="text" placeholder="Description of parameter">
+                </div>
 
-          <div class="genColumn">
-            <button id="saveFunction">Save Function</button>
+              </div>
           </div>
-        </div>
 
-        <hr>
-        <div class="documentation">
-          <h4>Command</h4>
-          <h4>Argument Description</h4>
-          <h4>Description</h4>
-          <h4>Example</h4>
+          <div class="genColumn functionDependent">
+            
+            <h4>Command</h4>
+            <pre><code>Example Text</code></pre>
+          
+            <h4>Description</h4>
+            <textarea></textarea>
+            <h4>Example</h4>
+            <pre><code id="exampleText">functionName&lpar;<input style="width:20px">,<input>&rpar;</code></pre>
+          
+          </div>
+
+          <div>
+           <button id="saveFunction">Save Function</button>
+          </div>
+
         </div>
 
     </div>

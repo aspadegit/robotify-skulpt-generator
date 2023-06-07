@@ -32,7 +32,7 @@ let $builtinmodule = function (name) {
         if(functionList[i].type === "Promise")
             code += generatePromiseFunction(functionList[i].skulptName, functionList[i].parameters, severusFunctionCall);
         else
-            code += generateReturnFunction(functionList[i].skulptName, "","","");
+            code += generateReturnFunction(functionList[i].skulptName, functionList[i].parameters, severusFunctionCall);
     }
 
     // string that is necessary for the end of the skulpt file
@@ -56,25 +56,31 @@ function generatePromiseFunction(promiseName, promiseParam, severusFunctionCall)
     Sk.builtin.pyCheckArgsLen("${promiseName}", ${promiseParam.length}, ${promiseParam.length}, ${promiseParam.length});
     susp.resume = function () {
         if (susp.data["error"]) {
-            throw new Sk.builtin.IOError(susp.data["error"].message);
+                throw new Sk.builtin.IOError(susp.data["error"].message);
         } else {
-            return new Sk.builtin.int_(susp.data["result"]);
-        }
-    };
+                return new Sk.builtin.int_(susp.data["result"]);
+            }
+        };
 
-    susp.data = {
-        type: "Sk.promise",
-        promise: ${severusFunctionCall}.then(() => susp.resume())
-    };
+        susp.data = {
+            type: "Sk.promise",
+            promise: ${severusFunctionCall}.then(() => susp.resume())
+        };
 
-    return susp;
-});
+        return susp;
+    });
 `;
 
     return promise;
 }
 
-function generateReturnFunction(returnName, returnParam, severusName, severusParam)
+function generateReturnFunction(returnName, returnParam, severusFunctionCall)
 {
-    return "\ni'm a return function named" + returnName;
+    return `
+    mod.${returnName} = new Sk.builtin.func(function ${returnName}(${returnParam.toString()}) {
+        let susp = new Sk.misceval.Suspension();
+        Sk.builtin.pyCheckArgsLen("${returnName}", ${returnParam.length}, ${returnParam.length}, ${returnParam.length});
+        return Sk.ffi.remapToPy(${severusFunctionCall});
+    });
+`;
 }

@@ -3,7 +3,6 @@ import {generateCode} from './codeGenerator.js';
 
 //TODO: test deleting and adding functions in different patterns
 //TODO: block empty functions saving?
-//TODO: deleting parameters
 //TODO: replacing special characters in names?
 
 const fileNameInput = document.getElementById("fileName");
@@ -26,6 +25,7 @@ var functionList = [];
 
 window.onload = function() 
 {
+    updateGeneratedCode();
     document.getElementById("saveFunction").onclick = function() { saveFunction() };
     document.getElementById("deleteFunctionBtn").onclick = function() { deleteFunction() };
     document.getElementById("editFunctionBtn").onclick = function() { editFunction() };
@@ -57,6 +57,7 @@ function saveFunction()
         functionDropdown.appendChild(newOption);
 
         currentFunction.index = functionDropdown.options.length-1;
+        functionList.push(newFunction);
 
     }
     //function is in the list
@@ -65,11 +66,18 @@ function saveFunction()
         //update the list
         functionDropdown.options[currentFunction.index].text = newFunction.skulptName;
         functionDropdown.options[currentFunction.index].value = JSON.stringify(newFunction);
+
+        functionList[currentFunction.index] = newFunction;
     }
 
     //update generated code
-    functionList.push(newFunction);
     updateGeneratedCode();
+
+    //clear so that the user knows they definitely saved the function
+    hideFunctionInfo();
+    currentFunction.function = null;
+    currentFunction.index = -1;
+    clearFunctionInfo();
 
 }
 
@@ -79,6 +87,8 @@ function editFunction()
     if(functionDropdown.options.length < 1)
         return false;
     
+    showFunctionInfo();
+
     let selectedIndex = functionDropdown.selectedIndex;
     let selectedFunction = JSON.parse(functionDropdown.options[selectedIndex].value);
 
@@ -109,6 +119,8 @@ function editFunction()
 
 function newFunction()
 {
+    showFunctionInfo();
+
     //say we're editing a new function
     currentFunction.function = null;
     currentFunction.index = -1;
@@ -215,6 +227,24 @@ function clearFunctionInfo()
     severusNameInput.value = "";
     typeDropdown.selectedIndex = 0;
     paramListDiv.innerHTML = "";
+}
+
+function hideFunctionInfo()
+{
+    let functionDependentElements = document.getElementsByClassName("functionDependent");
+    for(let i = 0; i < functionDependentElements.length; i++)
+    {
+        functionDependentElements.item(i).hidden = true;
+    }
+}
+
+function showFunctionInfo()
+{
+    let functionDependentElements = document.getElementsByClassName("functionDependent");
+    for(let i = 0; i < functionDependentElements.length; i++)
+    {
+        functionDependentElements.item(i).hidden = false;
+    }
 }
 
 //when the user types in a new file name, the code is updated

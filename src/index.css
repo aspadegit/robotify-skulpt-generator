@@ -18,11 +18,11 @@
 
 .genColumn {
     margin: 1em;
+    
 }
 
 .functionAndParam {
     display:flex;
-
 }
 
 #generatedCode {
@@ -31,16 +31,14 @@
 }
 
 #paramList {
-    display:flex;
-    flex-direction: column;
-    flex-wrap: wrap;
     max-height: 200px;
-
+    overflow-y: scroll;
+    min-width: 200px;
 }
 
 #parameterDiv{
-    max-height: 270px;
-    width: 40%;
+    max-height: 250px;
+    width: 20%;
 
 }
 
@@ -53,5 +51,10 @@
     border-style: solid;
     border-color: lightgray;
     padding: 1em;
-    min-height: 200px;
+    height: 250px;
+    overflow-y: scroll;
+}
+
+#argumentDescription {
+    overflow-y:scroll;
 }
