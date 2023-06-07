@@ -1,5 +1,6 @@
 import './index.css';
 import {generateCode} from './codeGenerator.js';
+import { convertToXML } from './xmlGenerator';
 
 //TODO: test deleting and adding functions in different patterns
 //TODO: block empty functions saving?
@@ -8,6 +9,8 @@ import {generateCode} from './codeGenerator.js';
     // currently only updates current function on save
     // will need input handlers
     // also TODO: revisit deleting a function after doing this
+    //may not need to do this
+//TODO: copy text buttons
 
 const fileNameInput = document.getElementById("fileName");
 const projectNameInput = document.getElementById("projectName");
@@ -20,6 +23,7 @@ const typeDropdown = document.getElementById("typeDropdown");
 const argumentDescription = document.getElementById("argumentDescription");
 const commandText = document.getElementById("commandText");
 const exampleText = document.getElementById("exampleText");
+const functionDescription = document.getElementById("functionDescription");
 
 var currentCode = "";
 
@@ -27,6 +31,7 @@ var currentCode = "";
 var currentFunction = { function: null, index: -1 };
 var currentParamList = [];  // list of variable names (for easy access / codeGenerator)
 var currentParamData = [];  // list of {name, type, desc}
+var exampleParameters = [];
 
 //overall function list; for generating code
 var functionList = [];
@@ -34,6 +39,7 @@ var functionList = [];
 window.onload = function() 
 {
     updateGeneratedCode();
+    convertToXML(fileNameInput.value, projectNameInput.value, functionList);
     document.getElementById("saveFunction").onclick = function() { saveFunction() };
     document.getElementById("deleteFunctionBtn").onclick = function() { deleteFunction() };
     document.getElementById("editFunctionBtn").onclick = function() { editFunction() };
@@ -51,7 +57,9 @@ function saveFunction()
         severusName: severusNameInput.value,
         parameters: currentParamList,
         parameterData: currentParamData,
-        type: selectedType
+        type: selectedType,
+        description: functionDescription.value,
+        exampleParam: exampleParameters
     }
 
     currentFunction.function = newFunction;
@@ -108,6 +116,7 @@ function editFunction()
     //update all the associated fields...
     skulptNameInput.value = selectedFunction.skulptName;
     severusNameInput.value = selectedFunction.severusName;
+    functionDescription.value = selectedFunction.description;
 
     if(selectedFunction.type === "Promise")
         typeDropdown.selectedIndex = 0;
@@ -126,8 +135,16 @@ function editFunction()
     }
 
     //update argument desc
+    currentParamList = selectedFunction.parameters;
     currentParamData = selectedFunction.parameterData;
     updateAllArgumentDesc();
+
+    //update command
+    updateCommandText();
+
+    //update example
+    exampleParameters = selectedFunction.exampleParam;
+    updateExample();
 
     return true;
 
@@ -141,6 +158,8 @@ function newFunction()
     currentFunction.function = null;
     currentFunction.index = -1;
     currentParamList = [];
+    currentParamData = [];
+    exampleParameters = [];
 
     //clear everything
     clearFunctionInfo();
@@ -152,25 +171,21 @@ function deleteFunction()
     if(functionDropdown.options.length < 1)
         return false;
     
-    currentFunction.function = JSON.parse(functionDropdown.options[functionDropdown.selectedIndex].value);
+    //currentFunction.function = JSON.parse(functionDropdown.options[functionDropdown.selectedIndex].value);
+    let selectedFunction = JSON.parse(functionDropdown.options[functionDropdown.selectedIndex].value);
 
-    if(currentFunction.function === null)
+    if(selectedFunction === null)
         return false;
 
-    let shouldDelete = confirm('Are you sure you want to delete ' + currentFunction.function.skulptName + '?');
+    let shouldDelete = confirm('Are you sure you want to delete ' + selectedFunction.skulptName + '?');
 
     if(shouldDelete)
     {
-        functionDropdown.remove(functionDropdown.selectedIndex);
-        clearFunctionInfo();
-
         functionList.splice(functionDropdown.selectedIndex,1);
+        functionDropdown.remove(functionDropdown.selectedIndex);
+
         updateGeneratedCode();
 
-        currentFunction.function = null;
-        currentFunction.index = -1;
-
-        hideFunctionInfo();
         return true;
     }
 
@@ -233,8 +248,10 @@ function deleteParameter(divToDelete, index)
 
         currentParamList.splice(index, 1);
         currentParamData.splice(index, 1);
+        exampleParameters.splice(index, 1);
 
         updateAllArgumentDesc();
+        updateExample();
         
         //update all the remaining stuff that wasn't deleted
         for(let i = 0; i < currentParamList.length; i++)
@@ -260,6 +277,9 @@ function clearFunctionInfo()
     typeDropdown.selectedIndex = 0;
     paramListDiv.innerHTML = "";
     argumentDescription.innerHTML = "";
+    functionDescription.value = "";
+    commandText.innerHTML = "No name given";
+    exampleText.innerHTML = "No name given";
 }
 
 function hideFunctionInfo()
@@ -279,6 +299,135 @@ function showFunctionInfo()
         functionDependentElements.item(i).hidden = false;
     }
 }
+
+//returns the div with all the HTML elements inside of it
+function addArgumentDescription(index) 
+{
+    currentParamData.push({name:"", type:"", description:""});
+
+    var paramName = document.createElement("input");
+    paramName.setAttribute("disabled", true);
+    
+    var typeInput = document.createElement("input");
+    typeInput.setAttribute("placeholder", "Type (e.g. Number)");
+    typeInput.id = "argTypeInput"+index;
+    typeInput.addEventListener('input', argumentTypeInputHandler);
+    typeInput.addEventListener('propertychange', argumentTypeInputHandler); //IE8
+
+    var descInput = document.createElement("input");
+    descInput.setAttribute("placeholder", "Description of parameter");
+    descInput.id = "argDescInput"+index;
+    descInput.addEventListener('input', argumentDescriptionInputHandler);
+    descInput.addEventListener('propertychange', argumentDescriptionInputHandler); //IE8
+
+    var containerDiv = document.createElement("div");
+    containerDiv.appendChild(paramName);
+    containerDiv.appendChild(typeInput);
+    containerDiv.appendChild(descInput);
+
+    containerDiv.style.margin = "0.2em";
+    containerDiv.id = "argument" + index;
+
+    argumentDescription.appendChild(containerDiv);
+    return containerDiv;
+}
+
+//updates a specific argument description element when editing a parameter name
+function updateArgumentDescByIndex(index)
+{
+    let currentDiv = document.getElementById("argument"+index);
+    currentDiv.children[0].value = `<strong>${currentParamData[index].name}</strong>:`;
+    currentDiv.children[1].value = currentParamData[index].type;
+    currentDiv.children[2].value = currentParamData[index].description;
+}
+
+//for when a parameter is deleted; updates the index ordering of the parameters
+function updateAllArgumentDesc()
+{
+    for(let i = 0; i < argumentDescription.children.length; i++)
+    {
+        let currentDiv = argumentDescription.children[i];
+        currentDiv.id = "argument" + i;
+        currentDiv.children[0].value = `<strong>${currentParamData[i].name}</strong>:`;
+        currentDiv.children[1].value = currentParamData[i].type;
+        currentDiv.children[2].value = currentParamData[i].description;
+    
+    }
+}
+
+//pulls from data elsewhere to update the text under the command heading
+function updateCommandText()
+{
+    let name = fileNameInput.value;
+    let skulptName = skulptNameInput.value;
+
+    let text = name + "." + skulptName + "(";
+
+    for(let i = 0; i < currentParamList.length; i++)
+    {
+        text += currentParamList[i] + ", ";
+    }
+
+    //cut off comma
+    if(currentParamList.length > 0)
+        text = text.substring(0, text.length-2);
+    text += ")";
+    
+    commandText.innerHTML = text;
+
+}
+
+//updates the example text by recreating the input boxes
+function updateExample()
+{
+    let name = fileNameInput.value;
+    let skulptName = skulptNameInput.value;
+    exampleText.innerHTML = "";
+
+    let text = name + "." + skulptName + "(";
+    exampleText.innerText = text;
+
+    //create the input boxes
+    for(let i = 0; i < currentParamList.length; i++)
+    {
+        let newInput = document.createElement("input");
+        newInput.id = "exampleParamInput" + i;
+        newInput.setAttribute("size", "5");
+
+        //checking if they already had some values in there
+        if(exampleParameters != null)
+        {
+            if(i < exampleParameters.length-1)
+                newInput.value = exampleParameters[i];
+            else
+                exampleParameters.push("");
+        }
+
+        //input handlers to update exampleParameters
+        newInput.addEventListener('input', exampleParamInputHandler);
+        newInput.addEventListener('propertychange', exampleParamInputHandler); //IE8
+
+        //add it to the HTML parent
+        exampleText.appendChild(newInput);
+
+        //comma between entries
+        if(i != currentParamList.length-1)
+            exampleText.appendChild(document.createTextNode(","));
+    }
+
+    exampleText.appendChild(document.createTextNode(")"));
+
+}
+
+
+function updateGeneratedCode()
+{
+
+    currentCode = generateCode(fileNameInput.value, functionList);
+    codeDisplay.innerHTML = currentCode;
+}
+
+//===================================== INPUT HANDLERS ====================================================
 
 //when the user types in a new file name, the code is updated
 const fileNameInputHandler = function(e) {
@@ -323,6 +472,8 @@ const parameterInputHandler = function(e) {
 
     //update argument description
     updateArgumentDescByIndex(paramIndex);
+
+    //update command text
     updateCommandText();
 
 }
@@ -341,107 +492,11 @@ const argumentDescriptionInputHandler = function(e) {
     currentParamData[index].description = e.target.value;
 }
 
-//returns the div with all the HTML elements inside of it
-function addArgumentDescription(index) 
-{
-    currentParamData.push({name:"", type:"", description:""});
+const exampleParamInputHandler = function(e) {
+    let index = parseInt(e.target.id.substring(17));
 
-    var paramName = document.createElement("input");
-    paramName.setAttribute("disabled", true);
-    
-    var typeInput = document.createElement("input");
-    typeInput.setAttribute("placeholder", "Type (e.g. Number)");
-    typeInput.id = "argTypeInput"+index;
-    typeInput.addEventListener('input', argumentTypeInputHandler);
-    typeInput.addEventListener('propertychange', argumentTypeInputHandler); //IE8
-
-    var descInput = document.createElement("input");
-    descInput.setAttribute("placeholder", "Description of parameter");
-    descInput.id = "argDescInput"+index;
-    descInput.addEventListener('input', argumentDescriptionInputHandler);
-    descInput.addEventListener('propertychange', argumentDescriptionInputHandler); //IE8
-
-    var containerDiv = document.createElement("div");
-    containerDiv.appendChild(paramName);
-    containerDiv.appendChild(typeInput);
-    containerDiv.appendChild(descInput);
-
-    containerDiv.style.margin = "0.2em";
-    containerDiv.id = "argument" + index;
-
-    argumentDescription.appendChild(containerDiv);
-    return containerDiv;
-}
-
-function updateArgumentDescByIndex(index)
-{
-    let currentDiv = document.getElementById("argument"+index);
-    currentDiv.children[0].value = `<strong>${currentParamData[index].name}</strong>:`;
-    currentDiv.children[1].value = currentParamData[index].type;
-    currentDiv.children[2].value = currentParamData[index].description;
-}
-
-function updateAllArgumentDesc()
-{
-    for(let i = 0; i < argumentDescription.children.length; i++)
-    {
-        let currentDiv = argumentDescription.children[i];
-        currentDiv.id = "argument" + i;
-        currentDiv.children[0].value = `<strong>${currentParamData[i].name}</strong>:`;
-        currentDiv.children[1].value = currentParamData[i].type;
-        currentDiv.children[2].value = currentParamData[i].description;
-    
-    }
-}
-
-function updateCommandText()
-{
-    let name = fileNameInput.value;
-    let skulptName = skulptNameInput.value;
-
-    let text = name + "." + skulptName + "(";
-
-    for(let i = 0; i < currentParamList.length; i++)
-    {
-        text += currentParamList[i] + ", ";
-    }
-
-    //cut off comma
-    if(currentParamList.length > 0)
-        text = text.substring(0, text.length-2);
-    text += ")";
-    
-    commandText.innerHTML = text;
-
-}
-
-function updateExample()
-{
-    let name = fileNameInput.value;
-    let skulptName = skulptNameInput.value;
-
-    let text = name + "." + skulptName + "(";
-    exampleText.innerText = text;
-
-    for(let i = 0; i < currentParamList.length; i++)
-    {
-        let newInput = document.createElement("input");
-        //newInput.style.width = "width:100%;margin:-3px;border:2px inset #eee";
-        newInput.setAttribute("size", "5");
-
-        exampleText.appendChild(newInput);
-
-        if(i != currentParamList.length-1)
-            exampleText.appendChild(document.createTextNode(","));
-    }
-
-    exampleText.appendChild(document.createTextNode(")"));
-
-}
-
-function updateGeneratedCode()
-{
-
-    currentCode = generateCode(fileNameInput.value, functionList);
-    codeDisplay.innerHTML = currentCode;
+    if(index < exampleParameters.length)
+        exampleParameters[index] = e.target.value;
+    else   
+        exampleParameters.push(e.target.value);
 }

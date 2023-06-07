@@ -18,7 +18,10 @@
    <body>
     <div id="pageContainer">
         <div class="loadSave">
-          <button class="btnPadding">Load Skulpt File</button> <button class="btnPadding">Save/Generate Skulpt</button>
+          <button class="btnPadding">Load Skulpt File</button> 
+          <a id="saveLink" href="#">
+            <button id="saveButton" class="btnPadding">Save/Generate Skulpt</button>
+          </a>
         </div>
         <hr>
 
@@ -87,13 +90,13 @@
             <pre><code id="commandText">No name given</code></pre>
           
             <h4>Description</h4>
-            <textarea></textarea>
+            <textarea id="functionDescription"></textarea>
             <h4>Example</h4>
-            <pre><code id="exampleText">No name given&lpar;&rpar;</code></pre>
+            <pre><code id="exampleText">No name given</code></pre>
           
           </div>
 
-          <div>
+          <div class="genColumn functionDependent">
            <button id="saveFunction">Save Function</button>
           </div>
 
