@@ -73,8 +73,12 @@ function saveFunction()
 
 }
 
+//returns whether it successfully loaded the edit
 function editFunction()
 {
+    if(functionDropdown.options.length < 1)
+        return false;
+    
     let selectedIndex = functionDropdown.selectedIndex;
     let selectedFunction = JSON.parse(functionDropdown.options[selectedIndex].value);
 
@@ -99,7 +103,7 @@ function editFunction()
     {
         addParameter().value = selectedFunction.parameters[i];
     }
-
+    return true;
 
 }
 
@@ -155,16 +159,54 @@ function addParameter()
     newParameterInput.addEventListener('input', parameterInputHandler);
     newParameterInput.addEventListener('propertychange', parameterInputHandler); //IE8
 
+    //set up delete button
+    var deleteBtn = document.createElement("button");
+    deleteBtn.id = "delParameter" + newIndex;
+    deleteBtn.innerHTML = "Delete";
+    deleteBtn.style.marginLeft = "0.2em";
+
     //put the new stuff into a div
     var newDiv = document.createElement("div");
     newDiv.style.margin = "0.2em";
     newDiv.appendChild(newParameterLabel);
     newDiv.appendChild(newParameterInput)
+    newDiv.appendChild(deleteBtn);
+
+    //delete button onclick
+    deleteBtn.onclick = function() { deleteParameter(newDiv, newIndex) };
 
     //append the div to the parameter list section
     paramListDiv.appendChild(newDiv);
 
     return newParameterInput; //for use in other functions
+}
+
+//returns whether successfully deleted
+function deleteParameter(divToDelete, index)
+{
+    let shouldDelete = confirm('Are you sure you want to delete parameter ' + index + '?');
+
+    if(shouldDelete)
+    {
+        //removes the div visually & programmatically
+        paramListDiv.removeChild(divToDelete);
+        currentParamList.splice(index, 1);
+        
+        //update all the remaining stuff that wasn't deleted
+        for(let i = 0; i < currentParamList.length; i++)
+        {
+            let currentDiv = paramListDiv.children[i];
+            currentDiv.children[0].innerText = "Parameter " + i + ": ";
+            currentDiv.children[1].id = "parameter"+i;
+            currentDiv.children[2].id = "delParameter"+i;
+            currentDiv.children[2].onclick = function() { deleteParameter(currentDiv, i) };
+            
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 function clearFunctionInfo()
