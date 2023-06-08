@@ -2,6 +2,7 @@ import './index.css';
 import {generateCode} from './codeGenerator.js';
 import { convertToXML, convertFromXML } from './xmlGenerator';
 
+//different elements on the page that will be accessed by functions
 const fileNameInput = document.getElementById("fileName");
 const projectNameInput = document.getElementById("projectName");
 const codeDisplay = document.getElementById("codeDisplay").firstChild;
@@ -22,13 +23,16 @@ var editingPreviousName = ""; //for use when saving a function while editing
 
 //current function & current parameter list (for editing a function)
 var currentFunction = { function: null, index: -1 };
+
+//these 3 all have the same indices (ex: parameter 0 = index 0, parameter 1 = index 1, etc.)
 var currentParamList = [];  // list of variable names (for easy access / codeGenerator)
 var currentParamData = [];  // list of {name, type, desc}
-var exampleParameters = [];
+var exampleParameters = []; 
 
 //overall function list; for generating code
 var functionList = [];
 
+//updates generatedCode & sets onclick functions
 window.onload = function() 
 {
     updateGeneratedCode();
@@ -44,7 +48,7 @@ window.onload = function()
 
 //================================ FUNCTION FUNCTIONS ===============================================
 
-//returns successful save
+//saves a function to the dropdown & functionList variable & returns whether save was successful
 function saveFunction()
 {
     let selectedType = typeDropdown.options[typeDropdown.selectedIndex].text;
@@ -119,18 +123,20 @@ function saveFunction()
     return true;
 }
 
-//returns whether it successfully loaded the edit
+//edits a function in the dropdown & returns whether it successfully loaded the edit
 function editFunction()
 {
+    //the dropdown is empty / there are no functions to edit
     if(functionDropdown.options.length < 1)
         return false;
     
     showFunctionInfo();
 
+    //grab the function we're editing
     let selectedIndex = functionDropdown.selectedIndex;
     let selectedFunction = JSON.parse(functionDropdown.options[selectedIndex].value);
 
-    //update what current function we're editing
+    //update current function to what we're editing
     currentFunction.function = selectedFunction;
     currentFunction.index = selectedIndex;
 
@@ -144,7 +150,7 @@ function editFunction()
     else
         typeDropdown.selectedIndex = 1;
 
-    //remove all the parameters and then add them back
+    //remove all the parameters and then add them back (to avoid dupes)
     paramListDiv.innerHTML = "";
     argumentDescription.innerHTML = "";
     
@@ -173,6 +179,7 @@ function editFunction()
 
 }
 
+//sets up the page in preparation for editing a new function
 function newFunction()
 {
     showFunctionInfo();
@@ -191,12 +198,12 @@ function newFunction()
 //returns whether successfully deleted
 function deleteFunction()
 {
+    //no functions in dropdown
     if(functionDropdown.options.length < 1)
         return false;
     
-    //currentFunction.function = JSON.parse(functionDropdown.options[functionDropdown.selectedIndex].value);
+    //grab function from dropdown
     let selectedFunction = JSON.parse(functionDropdown.options[functionDropdown.selectedIndex].value);
-
 
     if(selectedFunction === null)
         return false;
@@ -205,12 +212,14 @@ function deleteFunction()
 
     if(shouldDelete)
     {
-        //if editing
+        //if editing the function we're deleting, clear the stuff so you can't save a deleted function
         if(currentFunction.function != null && selectedFunction.skulptName === currentFunction.function.skulptName)
         {
             clearFunctionInfo();
             hideFunctionInfo();
         }
+
+        //remove from lists & dropdown
         functionList.splice(functionDropdown.selectedIndex,1);
         functionDropdown.remove(functionDropdown.selectedIndex);
 
@@ -222,6 +231,7 @@ function deleteFunction()
     return false;
 }
 
+//clears all the fields on the bottom half of the screen
 function clearFunctionInfo()
 {
     editingPreviousName = "";
@@ -235,6 +245,7 @@ function clearFunctionInfo()
     exampleText.innerHTML = "No name given";
 }
 
+//sets everything on the bottom half of the screen to be invisible
 function hideFunctionInfo()
 {
     let functionDependentElements = document.getElementsByClassName("functionDependent");
@@ -244,6 +255,7 @@ function hideFunctionInfo()
     }
 }
 
+//sets everything on the bottom half of the screen to be visible
 function showFunctionInfo()
 {
     let functionDependentElements = document.getElementsByClassName("functionDependent");
@@ -318,7 +330,7 @@ function checkDuplicateParamNames(newFunction)
 
 //================================= PARAMETER FUNCTIONS =============================================
 
-//returns the parameter input field
+//creates a parameter and returns the parameter input field
 function addParameter() 
 {
     currentParamList.push("");
@@ -355,7 +367,10 @@ function addParameter()
     //append the div to the parameter list section
     paramListDiv.appendChild(newDiv);
 
+    //add a corresponding arg description
     addArgumentDescription(newIndex);
+
+    //update everything that relies on parameters
     updateExample();
     updateCommandText();
 
@@ -369,14 +384,16 @@ function deleteParameter(divToDelete, index)
 
     if(shouldDelete)
     {
-        //removes the div visually & programmatically
+        //removes the div visually
         paramListDiv.removeChild(divToDelete);
         argumentDescription.removeChild(document.getElementById("argument"+index));
 
+        //removes the parameter from all of the relevant lists
         currentParamList.splice(index, 1);
         currentParamData.splice(index, 1);
         exampleParameters.splice(index, 1);
 
+        //update things that rely on parameters
         updateAllArgumentDesc();
         updateExample();
         
@@ -400,34 +417,42 @@ function deleteParameter(divToDelete, index)
 
 //================================ ARGUMENT DESC FUNCTIONS =================================================
 
-//returns the div with all the HTML elements inside of it
+//adds a new HTML div of the argument description returns the div with all the HTML elements inside of it
 function addArgumentDescription(index) 
 {
     currentParamData.push({name:"", type:"", description:""});
 
+    //the name of the parameter
     var paramName = document.createElement("input");
     paramName.setAttribute("disabled", true);
     
+    //input for type of the parameter
     var typeInput = document.createElement("input");
     typeInput.setAttribute("placeholder", "Type (e.g. Number)");
     typeInput.id = "argTypeInput"+index;
+    //type event listeners
     typeInput.addEventListener('input', argumentTypeInputHandler);
     typeInput.addEventListener('propertychange', argumentTypeInputHandler); //IE8
 
+    //input for the parameter's description
     var descInput = document.createElement("input");
     descInput.setAttribute("placeholder", "Description of parameter");
     descInput.id = "argDescInput"+index;
+    //description event listeners
     descInput.addEventListener('input', argumentDescriptionInputHandler);
     descInput.addEventListener('propertychange', argumentDescriptionInputHandler); //IE8
 
+    //add all the above stuff to a div
     var containerDiv = document.createElement("div");
     containerDiv.appendChild(paramName);
     containerDiv.appendChild(typeInput);
     containerDiv.appendChild(descInput);
 
+    //style the div
     containerDiv.style.margin = "0.4em";
     containerDiv.id = "argument" + index;
 
+    //put the div on the page
     argumentDescription.appendChild(containerDiv);
     return containerDiv;
 }
@@ -460,6 +485,7 @@ function updateAllArgumentDesc()
 //pulls from data elsewhere to update the text under the command heading
 function updateCommandText()
 {
+    //command is name.skulptName(parameters)
     let name = fileNameInput.value;
     let skulptName = skulptNameInput.value;
 
@@ -482,6 +508,7 @@ function updateCommandText()
 //updates the example text by recreating the input boxes
 function updateExample()
 {
+    //creates the text for name.skulptName(
     let name = fileNameInput.value;
     let skulptName = skulptNameInput.value;
     exampleText.innerHTML = "";
@@ -515,10 +542,12 @@ function updateExample()
             exampleText.appendChild(document.createTextNode(","));
     }
 
+    //puts the last section (right parentheses) on the page 
     exampleText.appendChild(document.createTextNode(")"));
 
 }
 
+//updates the generated skulpt code box using the generateCode function in codeGenerator.js
 function updateGeneratedCode()
 {
 
@@ -542,6 +571,7 @@ function clearAll()
     updateGeneratedCode();
 }
 
+//copies text to the clipboard; used for generated code
 function copyText(id)
 {
     let text = document.getElementById(id).innerText;
@@ -559,7 +589,6 @@ const fileNameInputHandler = function(e) {
     updateExample();
     updateGeneratedCode();
 }
-
 fileNameInput.addEventListener('input', fileNameInputHandler);
 fileNameInput.addEventListener('propertychange', fileNameInputHandler); //IE8
 
@@ -572,6 +601,7 @@ const projectNameInputHandler = function(e) {
 projectNameInput.addEventListener('input', projectNameInputHandler);
 projectNameInput.addEventListener('propertychange', projectNameInputHandler); //IE8
 
+//when the user types in a new function skulpt name, the code is updated
 const skulptNameInputHandler = function(e) {
     skulptNameInput.value = skulptNameInput.value.replace(regex, "_");
     updateCommandText();
@@ -580,16 +610,17 @@ const skulptNameInputHandler = function(e) {
 skulptNameInput.addEventListener('input', skulptNameInputHandler);
 skulptNameInput.addEventListener('propertychange', skulptNameInputHandler); //IE8
 
+//when the user types in a new severus function name, the code is updated
 const severusNameInputHandler = function(e) {
     severusNameInput.value = severusNameInput.value.replace(regex, "_");
 }
 severusNameInput.addEventListener('input', severusNameInputHandler);
 severusNameInput.addEventListener('propertychange', severusNameInputHandler); //IE8
 
-
-//for when any of the parameters are updated
+//for when any of the parameters are updated (listeners added on their initialization)
 const parameterInputHandler = function(e) {
 
+    //grab the index & adjust regex for the name
     let paramIndex = parseInt(e.target.id.substring(9));
     let paramName = e.target.value.replace(regex, "_");
     e.target.value = paramName;
@@ -615,9 +646,10 @@ const parameterInputHandler = function(e) {
 
 }
 
-//for when any type fields (argument desc) are updated
+//for when any type fields (in argument desc) are updated
 const argumentTypeInputHandler = function(e) {
     
+    //grab the index & adjust regex for the name
     let index = parseInt(e.target.id.substring(12));
     let value = e.target.value.replace(regex, "_");  
     e.target.value = value;
@@ -641,12 +673,16 @@ const argumentDescriptionInputHandler = function(e) {
     currentParamData[index].description = e.target.value;
 }
 
+//for whenever an individual field in the example parameters is changed
+    //adjusts the regex & updates the value in the code
 const exampleParamInputHandler = function(e) {
-    let index = parseInt(e.target.id.substring(17));
 
+    let index = parseInt(e.target.id.substring(17));
+    
     let value = e.target.value.replace(regex, "_");
     e.target.value = value;  
 
+    //avoids accidentally pushing an extra value
     if(index < exampleParameters.length)
         exampleParameters[index] = value;
     else   
@@ -660,7 +696,6 @@ loader.addEventListener('change', (event) => {
   //get the files that were loaded
   const fileList = event.target.files;
 
-  
   //reads the content of the file the user loaded
   if(fileList.length > 0)
   {
@@ -668,7 +703,10 @@ loader.addEventListener('change', (event) => {
     reader.readAsText(fileList[0], "UTF-8");
     reader.onload = function (e) {
 
+        //gets the page obj file with this function (from xmlGenerator.js)
         let skulptObj = convertFromXML(e.target.result);
+
+        //clear fields in preparation for loading
         clearAll();
 
         fileNameInput.value = skulptObj.fileName;

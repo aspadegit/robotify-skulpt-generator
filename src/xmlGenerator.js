@@ -1,4 +1,5 @@
 
+//takes in information from index.js & converts it to an XML file for download
 export function convertToXML(fileName, projectName, functionList)
 {
     var xmlDoc = document.implementation.createDocument(null, "skulptGenerator");
@@ -60,8 +61,9 @@ export function convertFromXML(xmlString)
 }
 
 
-// ========================================= HELPER FUNCTIONS ==============================================
+// ==================================== JAVASCRIPT TO XML HELPERS ==============================================
 
+//takes in one js skulpt function object and converts (& returns) it as DOM
 function functionToXML(xmlDoc, currentFunction)
 {
     var functionNode = xmlDoc.createElement("function");
@@ -106,7 +108,7 @@ function functionToXML(xmlDoc, currentFunction)
 
 }
 
-
+//takes in a parameter obj and converts (& returns) it as DOM
 function parameterToXML(xmlDoc, currentParameter)
 {
     var parameter = xmlDoc.createElement("parameter");
@@ -141,10 +143,14 @@ function addText(xmlDoc, text)
     return xmlDoc.createTextNode(text);
 }
 
+//==================================== XML TO JAVASCRIPT HELPERS ==================================================
+
+//takes in a function and converts it to a JS object
 function xmlToFunction(xml, currentFunction)
 {
     let children = currentFunction.childNodes;
 
+    //create the base obj to add to
     let functionObj = {
         skulptName: "", 
         severusName: "", 
@@ -177,7 +183,7 @@ function xmlToFunction(xml, currentFunction)
     //description
     functionObj.description = children[4].firstChild.nodeValue;
 
-    //example param
+    //example parameters
     let xmlExampleParam = children[5].childNodes;
     for(let i = 0; i < xmlExampleParam.length; i++)
     {
@@ -188,7 +194,7 @@ function xmlToFunction(xml, currentFunction)
 
 }
 
-//returns {name, type, desc}
+//takes in a parameter and returns {name, type, desc}
 function xmlToParameter(currentParameter)
 {
     let paramName = getInnerText(currentParameter, "name");
@@ -198,7 +204,7 @@ function xmlToParameter(currentParameter)
     return {name: paramName, type: paramType, description: paramDesc};
 }
 
-//for singular elements with only one textNode inside
+//for singular elements with only one textNode inside (when converting XML to js object)
 function getInnerText(xml, tagName)
 {  
     return xml.getElementsByTagName(tagName)[0].firstChild.nodeValue;
