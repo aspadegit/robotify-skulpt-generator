@@ -2,16 +2,6 @@ import './index.css';
 import {generateCode} from './codeGenerator.js';
 import { convertToXML, convertFromXML } from './xmlGenerator';
 
-//TODO: test deleting and adding functions in different patterns
-//TODO: block empty functions saving?
-//TODO: replacing special characters in names?
-//TODO: make current function actually respond. to being a current function
-    // currently only updates current function on save
-    // will need input handlers
-    // also TODO: revisit deleting a function after doing this
-    //may not need to do this
-//TODO: copy text buttons
-
 const fileNameInput = document.getElementById("fileName");
 const projectNameInput = document.getElementById("projectName");
 const codeDisplay = document.getElementById("codeDisplay").firstChild;
@@ -25,7 +15,10 @@ const commandText = document.getElementById("commandText");
 const exampleText = document.getElementById("exampleText");
 const functionDescription = document.getElementById("functionDescription");
 
+const regex = /[^a-zA-Z0-9_]+/g;
+
 var currentCode = "";
+var editingPreviousName = ""; //for use when saving a function while editing
 
 //current function & current parameter list (for editing a function)
 var currentFunction = { function: null, index: -1 };
@@ -46,10 +39,12 @@ window.onload = function()
     document.getElementById("editFunctionBtn").onclick = function() { editFunction() };
     document.getElementById("newFunctionBtn").onclick = function() { newFunction() };
     document.getElementById("addParamBtn").onclick = function() { addParameter() };
+    document.getElementById("copySkulpt").onclick = function() { copyText("skulptCode") };
 }
 
 //================================ FUNCTION FUNCTIONS ===============================================
 
+//returns successful save
 function saveFunction()
 {
     let selectedType = typeDropdown.options[typeDropdown.selectedIndex].text;
@@ -63,6 +58,28 @@ function saveFunction()
         type: selectedType,
         description: functionDescription.value,
         exampleParam: exampleParameters
+    }
+
+    //checking for duplicates / empty inputs
+    let emptyContent = checkEmptyFields(newFunction);
+    if(emptyContent != null)
+    {
+        alert('Cannot save function; ' + emptyContent + ' is empty and must contain content.');
+        return false;
+    }
+
+    let duplicateName = checkDuplicateFunctionNames(newFunction);
+    if(duplicateName != null)
+    {
+        alert('Cannot save function. The ' + duplicateName + ' function name already exists.');
+        return false;
+    }
+
+    let duplicateParam = checkDuplicateParamNames(newFunction);
+    if(duplicateParam != null)
+    {
+        alert('Cannot save function. Parameters ' + duplicateParam[0] + ' and ' + duplicateParam[1] + ' have the same name.');
+        return false;
     }
 
     currentFunction.function = newFunction;
@@ -98,7 +115,8 @@ function saveFunction()
     currentFunction.function = null;
     currentFunction.index = -1;
     clearFunctionInfo();
-
+    
+    return true;
 }
 
 //returns whether it successfully loaded the edit
@@ -149,6 +167,8 @@ function editFunction()
     exampleParameters = selectedFunction.exampleParam;
     updateExample();
 
+    editingPreviousName = selectedFunction.skulptName;
+
     return true;
 
 }
@@ -177,6 +197,7 @@ function deleteFunction()
     //currentFunction.function = JSON.parse(functionDropdown.options[functionDropdown.selectedIndex].value);
     let selectedFunction = JSON.parse(functionDropdown.options[functionDropdown.selectedIndex].value);
 
+
     if(selectedFunction === null)
         return false;
 
@@ -184,6 +205,12 @@ function deleteFunction()
 
     if(shouldDelete)
     {
+        //if editing
+        if(currentFunction.function != null && selectedFunction.skulptName === currentFunction.function.skulptName)
+        {
+            clearFunctionInfo();
+            hideFunctionInfo();
+        }
         functionList.splice(functionDropdown.selectedIndex,1);
         functionDropdown.remove(functionDropdown.selectedIndex);
 
@@ -197,6 +224,7 @@ function deleteFunction()
 
 function clearFunctionInfo()
 {
+    editingPreviousName = "";
     skulptNameInput.value = "";
     severusNameInput.value = "";
     typeDropdown.selectedIndex = 0;
@@ -223,6 +251,69 @@ function showFunctionInfo()
     {
         functionDependentElements.item(i).hidden = false;
     }
+}
+
+//for saving a function; returns the name of the first field it finds that is empty
+function checkEmptyFields(newFunction)
+{
+    if(skulptNameInput.value === "")
+        return "the skulpt function name";
+    
+    if(severusNameInput.value === "")
+        return "the severus function name";
+    
+    for(let i = 0; i < newFunction.parameters.length; i++)
+    {
+        if(newFunction.parameters[i] === "")
+            return "parameter " + i + "'s name";
+        
+        if(newFunction.parameterData[i].type === "" || newFunction.parameterData[i].type === "()")
+            return "parameter " + i + "'s type";
+        
+        if(newFunction.parameterData[i].description === "")
+            return "parameter " + i + "'s description";
+
+        if(newFunction.exampleParam[i] === "")
+            return "example parameter " + i;
+        
+        if(newFunction.exampleParam.length != newFunction.parameters.length)
+            return "at least one of the example parameters";
+    }
+
+    if(newFunction.description === "")
+        return "the function description";
+
+    return null;
+    
+}
+
+//returns whether it's a severus or skulpt name conflict, or null
+function checkDuplicateFunctionNames(newFunction)
+{
+    for(let i = 0; i < functionList.length; i++)
+    {
+        //if the new name is in the list & it's not the name that it was before editing
+        if(functionList[i].skulptName === newFunction.skulptName && newFunction.skulptName != editingPreviousName)
+            return "skulpt";
+        
+    }
+
+    return null;
+}
+
+//returns the two parameter indices that have a name conflict, or null
+function checkDuplicateParamNames(newFunction)
+{
+    for(let i = 0; i < newFunction.parameters.length; i++)
+    {
+        for(let j = i+1; j < newFunction.parameters.length; j++)
+        {
+            if(newFunction.parameters[i] === newFunction.parameters[j])
+                return [i,j];
+        }
+    }
+
+    return null;
 }
 
 //================================= PARAMETER FUNCTIONS =============================================
@@ -450,10 +541,19 @@ function clearAll()
     updateGeneratedCode();
 }
 
+function copyText(id)
+{
+    let text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text);
+  
+}
+
+
 //===================================== INPUT HANDLERS ====================================================
 
 //when the user types in a new file name, the code is updated
 const fileNameInputHandler = function(e) {
+    fileNameInput.value = fileNameInput.value.replace(regex, "_");
     updateCommandText();
     updateGeneratedCode();
 }
@@ -464,33 +564,45 @@ fileNameInput.addEventListener('propertychange', fileNameInputHandler); //IE8
 
 //when the user types in a new project name, the code is updated
 const projectNameInputHandler = function(e) {
-    
+    projectNameInput.value = projectNameInput.value.replace(regex, "_");
+
 }
 projectNameInput.addEventListener('input', projectNameInputHandler);
 projectNameInput.addEventListener('propertychange', projectNameInputHandler); //IE8
 
 const skulptNameInputHandler = function(e) {
+    skulptNameInput.value = skulptNameInput.value.replace(regex, "_");
     updateCommandText();
     updateExample();
 }
 skulptNameInput.addEventListener('input', skulptNameInputHandler);
 skulptNameInput.addEventListener('propertychange', skulptNameInputHandler); //IE8
 
+const severusNameInputHandler = function(e) {
+    severusNameInput.value = severusNameInput.value.replace(regex, "_");
+}
+severusNameInput.addEventListener('input', severusNameInputHandler);
+severusNameInput.addEventListener('propertychange', severusNameInputHandler); //IE8
+
+
 //for when any of the parameters are updated
 const parameterInputHandler = function(e) {
+
     let paramIndex = parseInt(e.target.id.substring(9));
+    let paramName = e.target.value.replace(regex, "_");
+    e.target.value = paramName;
 
     //it's a new value
     if(currentParamList.length-1 < paramIndex)
     {
-        currentParamList.push(e.target.value);
-        currentParamData.push({name:e.target.value, type:"", description:""})
+        currentParamList.push(paramName);
+        currentParamData.push({name:paramName, type:"", description:""})
     }
     //edit an existing value
     else
     {
-        currentParamList[paramIndex] = e.target.value; 
-        currentParamData[paramIndex].name = e.target.value; 
+        currentParamList[paramIndex] = paramName; 
+        currentParamData[paramIndex].name = paramName; 
     }
 
     //update argument description
@@ -505,7 +617,19 @@ const parameterInputHandler = function(e) {
 const argumentTypeInputHandler = function(e) {
     
     let index = parseInt(e.target.id.substring(12));
-    currentParamData[index].type = e.target.value;
+    let value = e.target.value.replace(regex, "_");  
+    e.target.value = value;
+
+    //types are added afterwards
+    if(value.length > 0)
+    {
+        if(value[0] != "(")
+            value = "(" + value;
+        
+        if(value[value.length-1] != ")")
+            value += ")";
+    }
+    currentParamData[index].type = value;
 
 }
 
@@ -518,10 +642,13 @@ const argumentDescriptionInputHandler = function(e) {
 const exampleParamInputHandler = function(e) {
     let index = parseInt(e.target.id.substring(17));
 
+    let value = e.target.value.replace(regex, "_");
+    e.target.value = value;  
+
     if(index < exampleParameters.length)
-        exampleParameters[index] = e.target.value;
+        exampleParameters[index] = value;
     else   
-        exampleParameters.push(e.target.value);
+        exampleParameters.push(value);
 }
 
 //for loading from a file
@@ -558,6 +685,10 @@ loader.addEventListener('change', (event) => {
         }
 
         updateGeneratedCode();
+
+        //reset the loader
+        loader.value = "";
+
     }
   }
 

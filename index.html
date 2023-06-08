@@ -18,7 +18,7 @@
    <body>
     <div id="pageContainer">
         <div class="loadSave">
-          <input id="loadButton" class="btnPadding" type="file">
+          <input id="loadButton" class="btnPadding" type="file" accept="application/xml">
           <a id="saveLink" href="#">
             <button id="saveButton" class="btnPadding">Save/Generate Skulpt</button>
           </a>
@@ -47,8 +47,8 @@
             </div>
           </div>
           <div class="genColumn" id="generatedCode">
-            <h4>Generated Code</h4>
-            <pre id="codeDisplay"><code>Default Text</code></pre>
+            <h4>Generated Code <button id="copySkulpt">Copy Skulpt Code</button></h4>
+            <pre id="codeDisplay"><code id="skulptCode">Default Text</code></pre>
           </div>
         </div>
 
