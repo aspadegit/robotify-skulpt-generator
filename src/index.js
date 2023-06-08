@@ -1,6 +1,6 @@
 import './index.css';
 import {generateCode} from './codeGenerator.js';
-import { convertToXML } from './xmlGenerator';
+import { convertToXML, convertFromXML } from './xmlGenerator';
 
 //TODO: test deleting and adding functions in different patterns
 //TODO: block empty functions saving?
@@ -47,6 +47,8 @@ window.onload = function()
     document.getElementById("newFunctionBtn").onclick = function() { newFunction() };
     document.getElementById("addParamBtn").onclick = function() { addParameter() };
 }
+
+//================================ FUNCTION FUNCTIONS ===============================================
 
 function saveFunction()
 {
@@ -193,6 +195,38 @@ function deleteFunction()
     return false;
 }
 
+function clearFunctionInfo()
+{
+    skulptNameInput.value = "";
+    severusNameInput.value = "";
+    typeDropdown.selectedIndex = 0;
+    paramListDiv.innerHTML = "";
+    argumentDescription.innerHTML = "";
+    functionDescription.value = "";
+    commandText.innerHTML = "No name given";
+    exampleText.innerHTML = "No name given";
+}
+
+function hideFunctionInfo()
+{
+    let functionDependentElements = document.getElementsByClassName("functionDependent");
+    for(let i = 0; i < functionDependentElements.length; i++)
+    {
+        functionDependentElements.item(i).hidden = true;
+    }
+}
+
+function showFunctionInfo()
+{
+    let functionDependentElements = document.getElementsByClassName("functionDependent");
+    for(let i = 0; i < functionDependentElements.length; i++)
+    {
+        functionDependentElements.item(i).hidden = false;
+    }
+}
+
+//================================= PARAMETER FUNCTIONS =============================================
+
 //returns the parameter input field
 function addParameter() 
 {
@@ -271,35 +305,8 @@ function deleteParameter(divToDelete, index)
     return false;
 }
 
-function clearFunctionInfo()
-{
-    skulptNameInput.value = "";
-    severusNameInput.value = "";
-    typeDropdown.selectedIndex = 0;
-    paramListDiv.innerHTML = "";
-    argumentDescription.innerHTML = "";
-    functionDescription.value = "";
-    commandText.innerHTML = "No name given";
-    exampleText.innerHTML = "No name given";
-}
 
-function hideFunctionInfo()
-{
-    let functionDependentElements = document.getElementsByClassName("functionDependent");
-    for(let i = 0; i < functionDependentElements.length; i++)
-    {
-        functionDependentElements.item(i).hidden = true;
-    }
-}
-
-function showFunctionInfo()
-{
-    let functionDependentElements = document.getElementsByClassName("functionDependent");
-    for(let i = 0; i < functionDependentElements.length; i++)
-    {
-        functionDependentElements.item(i).hidden = false;
-    }
-}
+//================================ ARGUMENT DESC FUNCTIONS =================================================
 
 //returns the div with all the HTML elements inside of it
 function addArgumentDescription(index) 
@@ -355,6 +362,8 @@ function updateAllArgumentDesc()
     
     }
 }
+
+//================================ MISC. FUNCTIONS ====================================================
 
 //pulls from data elsewhere to update the text under the command heading
 function updateCommandText()
@@ -418,12 +427,27 @@ function updateExample()
 
 }
 
-
 function updateGeneratedCode()
 {
 
     currentCode = generateCode(fileNameInput.value, functionList);
     codeDisplay.innerHTML = currentCode;
+}
+
+//clears all data in preparation for loading
+function clearAll()
+{
+    fileNameInput.value = "";
+    projectNameInput.value = "";
+    functionDropdown.innerHTML = "";
+    functionList = [];
+    currentFunction = { function: null, index: -1 };
+    currentParamList = [];  
+    currentParamData = [];  
+    exampleParameters = [];
+    clearFunctionInfo();
+    hideFunctionInfo();
+    updateGeneratedCode();
 }
 
 //===================================== INPUT HANDLERS ====================================================
@@ -499,3 +523,42 @@ const exampleParamInputHandler = function(e) {
     else   
         exampleParameters.push(e.target.value);
 }
+
+//for loading from a file
+const loader = document.getElementById('loadButton');
+loader.addEventListener('change', (event) => {
+
+  //get the files that were loaded
+  const fileList = event.target.files;
+
+  
+  //reads the content of the file the user loaded
+  if(fileList.length > 0)
+  {
+    var reader = new FileReader();
+    reader.readAsText(fileList[0], "UTF-8");
+    reader.onload = function (e) {
+
+        let skulptObj = convertFromXML(e.target.result);
+        clearAll();
+
+        fileNameInput.value = skulptObj.fileName;
+        projectNameInput.value = skulptObj.projectName;
+        
+        //functions
+        functionList = skulptObj.functionList;
+        for(let i = 0; i < functionList.length; i++)
+        {
+            //append the function to the dropdown
+            var newOption = document.createElement("option");
+            newOption.text = functionList[i].skulptName;
+            newOption.value = JSON.stringify(functionList[i]);
+            functionDropdown.appendChild(newOption);
+    
+        }
+
+        updateGeneratedCode();
+    }
+  }
+
+});

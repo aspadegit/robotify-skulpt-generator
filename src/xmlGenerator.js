@@ -24,6 +24,7 @@ export function convertToXML(fileName, projectName, functionList)
 
     xmlDoc.documentElement.appendChild(functions);
 
+    //create blob for downloading
     let blob = new Blob([new XMLSerializer().serializeToString(xmlDoc)], {type: 'application/xml'});
     
     let link = document.getElementById("saveLink");
@@ -32,11 +33,29 @@ export function convertToXML(fileName, projectName, functionList)
     link.href = URL.createObjectURL(blob);
 }
 
+//returns following object:
+    // {fileName: "(name)", projectName: "(projectName)", functionList: [allTheFunctions]}
 export function convertFromXML(xmlString)
 {
     const parser = new DOMParser();
     const xml = parser.parseFromString(xmlString, "application/xml");
-    console.log(xml);
+
+    //file & project names
+    let file = getInnerText(xml, "file");
+    let project = getInnerText(xml, "project");
+
+    let functions = [];
+    let xmlFunctions = xml.getElementsByTagName("function");
+
+    //convert all the functions and push them into function list
+    for(let i = 0; i < xmlFunctions.length; i++)
+    {
+        let newFunction = xmlToFunction(xml, xmlFunctions[i]);
+        functions.push(newFunction);
+    }
+
+    //return obj of all the important stuff
+    return {fileName: file, projectName: project, functionList: functions};
 
 }
 
@@ -120,4 +139,67 @@ function createAddText(xmlDoc, elementName, text)
 function addText(xmlDoc, text)
 {
     return xmlDoc.createTextNode(text);
+}
+
+function xmlToFunction(xml, currentFunction)
+{
+    let children = currentFunction.childNodes;
+
+    let functionObj = {
+        skulptName: "", 
+        severusName: "", 
+        parameters: [], 
+        parameterData:[], 
+        type:"", 
+        description:"", 
+        exampleParam:[]
+    };
+
+    //skulpt name
+    functionObj.skulptName = children[0].firstChild.nodeValue;
+
+    //severus name
+    functionObj.severusName = children[1].firstChild.nodeValue;
+
+    //parameters
+    let xmlParameters = children[2].childNodes;
+    for(let i = 0; i < xmlParameters.length; i++)
+    {
+        let paramResult = xmlToParameter(xmlParameters[i]);
+        functionObj.parameters.push(paramResult.name);
+        functionObj.parameterData.push(paramResult);
+
+    }
+
+    //type
+    functionObj.type = children[3].firstChild.nodeValue;
+
+    //description
+    functionObj.description = children[4].firstChild.nodeValue;
+
+    //example param
+    let xmlExampleParam = children[5].childNodes;
+    for(let i = 0; i < xmlExampleParam.length; i++)
+    {
+        functionObj.exampleParam.push(xmlExampleParam[i].firstChild.nodeValue);
+    }
+
+    return functionObj;
+
+}
+
+//returns {name, type, desc}
+function xmlToParameter(currentParameter)
+{
+    let paramName = getInnerText(currentParameter, "name");
+    let paramType = getInnerText(currentParameter, "paramType");
+    let paramDesc = getInnerText(currentParameter, "paramDescription");
+
+    return {name: paramName, type: paramType, description: paramDesc};
+}
+
+//for singular elements with only one textNode inside
+function getInnerText(xml, tagName)
+{  
+    return xml.getElementsByTagName(tagName)[0].firstChild.nodeValue;
 }
