@@ -39,7 +39,8 @@ var functionList = [];
 window.onload = function() 
 {
     updateGeneratedCode();
-    convertToXML(fileNameInput.value, projectNameInput.value, functionList);
+    
+    document.getElementById("saveButton").onclick = function() { convertToXML(fileNameInput.value, projectNameInput.value, functionList) };
     document.getElementById("saveFunction").onclick = function() { saveFunction() };
     document.getElementById("deleteFunctionBtn").onclick = function() { deleteFunction() };
     document.getElementById("editFunctionBtn").onclick = function() { editFunction() };
@@ -397,10 +398,8 @@ function updateExample()
         //checking if they already had some values in there
         if(exampleParameters != null)
         {
-            if(i < exampleParameters.length-1)
+            if(i < exampleParameters.length)
                 newInput.value = exampleParameters[i];
-            else
-                exampleParameters.push("");
         }
 
         //input handlers to update exampleParameters
