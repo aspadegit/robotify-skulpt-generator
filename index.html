@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@200;300;400;500&family=Pathway+Gothic+One&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" type="text/css" href="./index.css">
     <meta charset="utf-8" />
     <title>Skulpt Generator</title>
     <script type="javascript" src="./src/index.js"></script>
@@ -18,9 +18,10 @@
    <body>
     <div id="pageContainer">
         <div class="loadSave">
-          <input id="loadButton" class="btnPadding" type="file" accept="application/xml">
+          <label id="loadBtnLabel" for="loadButton" class="btn btnPadding">Load Skulpt File</label>
+          <input id="loadButton" hidden="true" type="file" accept="application/xml">
           <a id="saveLink" href="#">
-            <button id="saveButton" class="btnPadding">Save/Generate Skulpt</button>
+            <button id="saveButton" class="btn btnPadding">Save/Generate Skulpt</button>
           </a>
         </div>
         <hr>
@@ -39,15 +40,15 @@
               <h4>Choose an Existing Function</h4>
               <select id="functionDropdown" name="functionDropdown"></select>
               <br><br>
-              <button id="editFunctionBtn">Edit</button>
-              <button id="deleteFunctionBtn">Delete</button>
+              <button id="editFunctionBtn" class="btn">Edit</button>
+              <button id="deleteFunctionBtn" class="btn">Delete</button>
   
               <h4>Create a New Function</h4>
-              <button id="newFunctionBtn">New Function</button>
+              <button id="newFunctionBtn" class="btn">New Function</button>
             </div>
           </div>
           <div class="genColumn" id="generatedCode">
-            <h4>Generated Code <button id="copySkulpt">Copy Skulpt Code</button></h4>
+            <h4>Generated Code <button id="copySkulpt" class="btn">Copy Skulpt Code</button></h4>
             <pre id="codeDisplay"><code id="skulptCode">Default Text</code></pre>
           </div>
         </div>
@@ -73,7 +74,7 @@
           </div>
 
           <div class="genColumn functionDependent" id="parameterDiv">
-            <h4>Parameters <button id="addParamBtn">Add New Parameter</button></h4>            
+            <h4>Parameters <button id="addParamBtn" class="btn">Add New Parameter</button></h4>            
             <div id="paramList">
             </div>
           </div>
@@ -97,7 +98,7 @@
           </div>
 
           <div class="genColumn functionDependent">
-           <button id="saveFunction">Save Function</button>
+           <button id="saveFunction" class="btn">Save Function</button>
           </div>
 
         </div>

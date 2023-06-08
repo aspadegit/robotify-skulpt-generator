@@ -340,6 +340,7 @@ function addParameter()
     deleteBtn.id = "delParameter" + newIndex;
     deleteBtn.innerHTML = "Delete";
     deleteBtn.style.marginLeft = "0.2em";
+    deleteBtn.className = "btn";
 
     //put the new stuff into a div
     var newDiv = document.createElement("div");
@@ -424,7 +425,7 @@ function addArgumentDescription(index)
     containerDiv.appendChild(typeInput);
     containerDiv.appendChild(descInput);
 
-    containerDiv.style.margin = "0.2em";
+    containerDiv.style.margin = "0.4em";
     containerDiv.id = "argument" + index;
 
     argumentDescription.appendChild(containerDiv);
@@ -555,6 +556,7 @@ function copyText(id)
 const fileNameInputHandler = function(e) {
     fileNameInput.value = fileNameInput.value.replace(regex, "_");
     updateCommandText();
+    updateExample();
     updateGeneratedCode();
 }
 
