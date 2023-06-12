@@ -26,6 +26,7 @@ const regex = /[^a-zA-Z0-9_]+/g;
 
 var currentCode = "";
 var editingPreviousName = ""; //for use when saving a function while editing
+var functionHidden = true; // variable for if the last row is hidden (for saving)
 
 //current function & current parameter list (for editing a function)
 var currentFunction = { function: null, index: -1 };
@@ -43,13 +44,16 @@ window.onload = function()
 {
     updateGeneratedCode();
     
-    document.getElementById("saveButton").onclick = function() { convertToXML(fileNameInput.value, projectNameInput.value, functionList) };
+    document.getElementById("saveButton").onclick = function() { savePage() };
     document.getElementById("saveFunction").onclick = function() { saveFunction() };
+    document.getElementById("cancelFunction").onclick = function() { cancelEdit() };
     document.getElementById("deleteFunctionBtn").onclick = function() { deleteFunction() };
     document.getElementById("editFunctionBtn").onclick = function() { editFunction() };
     document.getElementById("newFunctionBtn").onclick = function() { newFunction() };
     document.getElementById("addParamBtn").onclick = function() { addParameter() };
     document.getElementById("copySkulpt").onclick = function() { copyText("skulptCode") };
+
+    hideFunctionInfo();
 }
 
 //================================ FUNCTION FUNCTIONS ===============================================
@@ -185,6 +189,19 @@ function editFunction()
 
 }
 
+//allows the user to stop editing the function
+function cancelEdit()
+{
+    let shouldCancel = confirm('Are you sure you want to cancel editing?');
+
+    if(shouldCancel)
+    {
+        clearFunctionInfo();
+        hideFunctionInfo();
+    }
+    
+}
+
 //sets up the page in preparation for editing a new function
 function newFunction()
 {
@@ -259,6 +276,8 @@ function hideFunctionInfo()
     {
         functionDependentElements.item(i).hidden = true;
     }
+
+    functionHidden = true;
 }
 
 //sets everything on the bottom half of the screen to be visible
@@ -269,6 +288,8 @@ function showFunctionInfo()
     {
         functionDependentElements.item(i).hidden = false;
     }
+
+    functionHidden = false;
 }
 
 //for saving a function; returns the name of the first field it finds that is empty
@@ -575,6 +596,31 @@ function clearAll()
     clearFunctionInfo();
     hideFunctionInfo();
     updateGeneratedCode();
+}
+
+//saves the whole page into XML file & downloads it; returns whether it was a successful save
+function savePage()
+{
+    let continueUnsaved;
+
+    //function is not hidden, meaning one is being edited
+    if(!functionHidden)
+        continueUnsaved = confirm('A function is still being edited. Saving the page will not save these edits into the XML. Continue?');
+    else
+        continueUnsaved = true;
+
+    //cancel download
+    if(!continueUnsaved)
+    {
+        let link = document.getElementById("saveLink");
+        link.href = "#";
+        link.removeAttribute('download');
+        return false;
+    }
+
+    //do the conversion & return true
+    convertToXML(fileNameInput.value, projectNameInput.value, functionList);
+    return true;
 }
 
 //copies text to the clipboard; used for generated code
