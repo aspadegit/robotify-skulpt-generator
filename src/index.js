@@ -611,6 +611,18 @@ function clearAll()
 //saves the whole page into XML file & downloads it; returns whether it was a successful save
 function savePage()
 {
+    //check to make sure file name and project name are filled out
+    if(fileNameInput.value === "")
+    {
+        alert('File name is empty. Please enter it to save.');
+        return false;
+    }
+    if(projectNameInput.value === "")
+    {
+        alert('Project name is empty. Please enter it to save');
+        return false;
+    }
+
     let continueUnsaved;
 
     //function is not hidden, meaning one is being edited
