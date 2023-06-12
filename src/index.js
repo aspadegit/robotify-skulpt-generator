@@ -611,15 +611,21 @@ function clearAll()
 //saves the whole page into XML file & downloads it; returns whether it was a successful save
 function savePage()
 {
+    let link = document.getElementById("saveLink");
+
     //check to make sure file name and project name are filled out
     if(fileNameInput.value === "")
     {
         alert('File name is empty. Please enter it to save.');
+        link.href = "#";
+        link.removeAttribute('download');
         return false;
     }
     if(projectNameInput.value === "")
     {
         alert('Project name is empty. Please enter it to save');
+        link.href = "#";
+        link.removeAttribute('download');
         return false;
     }
 
@@ -634,7 +640,6 @@ function savePage()
     //cancel download
     if(!continueUnsaved)
     {
-        let link = document.getElementById("saveLink");
         link.href = "#";
         link.removeAttribute('download');
         return false;
