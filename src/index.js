@@ -27,6 +27,7 @@ const regex = /[^a-zA-Z0-9_]+/g;
 var currentCode = "";
 var editingPreviousName = ""; //for use when saving a function while editing
 var functionHidden = true; // variable for if the last row is hidden (for saving)
+var unsaved = false; //asks user about being sure for closing / refreshing page if there are unsaved changes
 
 //current function & current parameter list (for editing a function)
 var currentFunction = { function: null, index: -1 };
@@ -55,6 +56,13 @@ window.onload = function()
 
     hideFunctionInfo();
 }
+
+//asks the user if they want to reload / change pages if there are unsaved changes
+window.onbeforeunload = function(){ 
+    if(unsaved || !functionHidden)
+        return "Work may be unsaved; are you sure you want to leave the page?";
+};
+
 
 //================================ FUNCTION FUNCTIONS ===============================================
 
@@ -216,6 +224,7 @@ function newFunction()
 
     //clear everything
     clearFunctionInfo();
+
 }
 
 //returns whether successfully deleted
@@ -289,6 +298,7 @@ function showFunctionInfo()
         functionDependentElements.item(i).hidden = false;
     }
 
+    unsaved = true;
     functionHidden = false;
 }
 
@@ -619,6 +629,7 @@ function savePage()
     }
 
     //do the conversion & return true
+    unsaved = false;
     convertToXML(fileNameInput.value, projectNameInput.value, functionList);
     return true;
 }
@@ -640,6 +651,8 @@ const fileNameInputHandler = function(e) {
     updateCommandText();
     updateExample();
     updateGeneratedCode();
+    unsaved = true;
+
 }
 fileNameInput.addEventListener('input', fileNameInputHandler);
 fileNameInput.addEventListener('propertychange', fileNameInputHandler); //IE8
@@ -648,7 +661,7 @@ fileNameInput.addEventListener('propertychange', fileNameInputHandler); //IE8
 //when the user types in a new project name, the code is updated
 const projectNameInputHandler = function(e) {
     projectNameInput.value = projectNameInput.value.replace(regex, "_");
-
+    unsaved = true;
 }
 projectNameInput.addEventListener('input', projectNameInputHandler);
 projectNameInput.addEventListener('propertychange', projectNameInputHandler); //IE8
@@ -658,6 +671,8 @@ const skulptNameInputHandler = function(e) {
     skulptNameInput.value = skulptNameInput.value.replace(regex, "_");
     updateCommandText();
     updateExample();
+    unsaved = true;
+
 }
 skulptNameInput.addEventListener('input', skulptNameInputHandler);
 skulptNameInput.addEventListener('propertychange', skulptNameInputHandler); //IE8
@@ -665,6 +680,8 @@ skulptNameInput.addEventListener('propertychange', skulptNameInputHandler); //IE
 //when the user types in a new severus function name, the code is updated
 const severusNameInputHandler = function(e) {
     severusNameInput.value = severusNameInput.value.replace(regex, "_");
+    unsaved = true;
+
 }
 severusNameInput.addEventListener('input', severusNameInputHandler);
 severusNameInput.addEventListener('propertychange', severusNameInputHandler); //IE8
@@ -696,6 +713,8 @@ const parameterInputHandler = function(e) {
     //update command text
     updateCommandText();
 
+    unsaved = true;
+
 }
 
 //for when any type fields (in argument desc) are updated
@@ -716,6 +735,7 @@ const argumentTypeInputHandler = function(e) {
             value += ")";
     }
     currentParamData[index].type = value;
+    unsaved = true;
 
 }
 
@@ -723,6 +743,8 @@ const argumentTypeInputHandler = function(e) {
 const argumentDescriptionInputHandler = function(e) {
     let index = parseInt(e.target.id.substring(12));
     currentParamData[index].description = e.target.value;
+    unsaved = true;
+
 }
 
 //for whenever an individual field in the example parameters is changed
@@ -739,6 +761,9 @@ const exampleParamInputHandler = function(e) {
         exampleParameters[index] = value;
     else   
         exampleParameters.push(value);
+    
+    unsaved = true;
+
 }
 
 //for loading from a file

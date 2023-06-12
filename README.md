@@ -23,3 +23,10 @@ To build, use `npm run build`.
 - The **Description** contains a text area element that will take in the function's description. It can be dragged to be made bigger.
 - The **Example** section allows you to write in example values for each of the parameters.
 - The `Save Function` button saves all the fields as an object and stores it in the function list.
+- The `Cancel Function` button cancels all edits of the function, and does not save the function if it is a new function.
+
+## Additional Notes
+- Reloading the page will create a fresh skulpt file
+    - Note that this will undo any changes you've made. Save the file if you wish to save your work before doing so.
+- Any saved changes made to a function (with the `Save Function` button) will not be saved in the file unless you save the file itself again (from the top of the page).
+- If you are creating a new function, or editing another function, the `Edit` button will override any unsaved work.
