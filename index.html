@@ -17,6 +17,8 @@
    </head>
    <body>
     <div id="pageContainer">
+
+      <!--Very top of page (first row; load / save)-->
         <div class="loadSave">
           <label id="loadBtnLabel" for="loadButton" class="btn btnPadding">Load Skulpt File</label>
           <input id="loadButton" hidden="true" type="file" accept="application/xml">
@@ -26,7 +28,10 @@
         </div>
         <hr>
 
+        <!--Second row of page (generated code & name inputs)-->
         <div class="mainGenerator">
+
+          <!--Name input column & choose a function-->
           <div class="genColumn" id="nameInput">
             <div>
               <h4>File Name</h4>
@@ -34,7 +39,6 @@
               <h4>Project Name</h4>
               <input id="projectName" type="text">
             </div>
-
             <br><hr>
             <div>
               <h4>Choose an Existing Function</h4>
@@ -47,6 +51,8 @@
               <button id="newFunctionBtn" class="btn">New Function</button>
             </div>
           </div>
+
+          <!--Div for the generated skulpt code-->
           <div class="genColumn" id="generatedCode">
             <h4>Generated Code <button id="copySkulpt" class="btn">Copy Skulpt Code</button></h4>
             <pre id="codeDisplay"><code id="skulptCode">Default Text</code></pre>
@@ -56,8 +62,10 @@
         
         <hr>
 
+        <!--Final row (where function information is generated)-->
         <div class="functionAndParam">
 
+          <!--First column (name & type)-->
           <div class="genColumn functionDependent">
             <h4>Skulpt Function Name</h4>
             <input id="skulptNameInput" type="text">
@@ -73,18 +81,21 @@
 
           </div>
 
+          <!--Generate parameters-->
           <div class="genColumn functionDependent" id="parameterDiv">
             <h4>Parameters <button id="addParamBtn" class="btn">Add New Parameter</button></h4>            
             <div id="paramList">
             </div>
           </div>
           
+          <!--Argument description-->
           <div class="genColumn functionDependent">
               <h4>Argument Description</h4>
               <div id="argumentDescription">
               </div>
           </div>
 
+          <!--Second to last column (command, desc, example)-->
           <div class="genColumn functionDependent" id="commandDescExampleColumn">
             
             <h4>Command</h4>
@@ -97,6 +108,7 @@
           
           </div>
 
+          <!--Last column (save button)-->
           <div class="genColumn functionDependent">
            <button id="saveFunction" class="btn">Save Function</button>
           </div>

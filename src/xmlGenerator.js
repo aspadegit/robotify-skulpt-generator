@@ -1,3 +1,7 @@
+/*
+    This file has all the functions to generate and read XML for the page.
+    The main functions are imported in index.js
+*/
 
 //takes in information from index.js & converts it to an XML file for download
 export function convertToXML(fileName, projectName, functionList)
@@ -207,5 +211,11 @@ function xmlToParameter(currentParameter)
 //for singular elements with only one textNode inside (when converting XML to js object)
 function getInnerText(xml, tagName)
 {  
-    return xml.getElementsByTagName(tagName)[0].firstChild.nodeValue;
+    let element = xml.getElementsByTagName(tagName)[0];
+    
+    //checks for empty names
+    if(element.firstChild === null)
+        return "";
+
+    return element.firstChild.nodeValue;
 }

@@ -27,11 +27,13 @@ label{
     font-size:14px;
 }
 
+/* The whole page */
 .pageContainer {
     display:flex;
     font-family: sans-serif;
 }
 
+/* Buttons at the very top */
 .loadSave {
     text-align: center;
     padding: 1em;
@@ -42,18 +44,20 @@ label{
     margin-right: 2em;
 }
 
+/* The second row of the page (including both inputs & code) */
 .mainGenerator {
     display:flex;
 }
 
+/* General column; a margin for most columns */
 .genColumn {
     margin: 1em;
 }
 
+/* Bottom row of the page */
 .functionAndParam {
     display:flex;
 }
-
 
 .btn {
     background-color: rgb(233, 238, 243);
@@ -77,28 +81,32 @@ label{
     background-color: rgb(138, 138, 138);
 }
 
-
+/* Div where the skulpt code is generated (including heading) */
 #generatedCode {
     flex-basis: 70%;
 
 }
 
+/* Div where new parameters are generated */
 #paramList {
     max-height: 300px;
     overflow-y: scroll;
     min-width: 200px;
 }
 
+/* Div including paramList & the heading for parameters */
 #parameterDiv{
     max-height: 250px;
     width: 20%;
 
 }
 
+/* Column with file & project name & choose a function */
 #nameInput {
     flex: 0 0 20%;
 }
 
+/* Where the text for the code is put */
 #codeDisplay {
     border-width: 2px;
     border-style: solid;
@@ -108,18 +116,19 @@ label{
     overflow-y: scroll;
 }
 
+/* The column with the argument description */
 #argumentDescription {
     overflow-y:scroll;
     min-width: 400px;
     max-height: 300px;
 }
 
+/* The column with command, description, example */
 #commandDescExampleColumn {
     max-width: 500px;
     overflow-x:scroll;
 
 }
-
 
 #loadBtnLabel {
     width: fit-content;

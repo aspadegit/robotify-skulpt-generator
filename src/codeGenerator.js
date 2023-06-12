@@ -1,4 +1,9 @@
+/*
+    This file generates the skulpt code, imported in index.js
+    Separate from index.js for cleanliness
+*/
 
+//takes in information from index.js to generate skulpt code, then creates and returns the string
 export function generateCode(fileName, functionList)
 {
     
@@ -9,7 +14,6 @@ let $builtinmodule = function (name) {
     mod.__name__ = new Sk.builtin.str("${fileName}");
 
 `
-
     let code = starterString;
 
     //loop over each function and add to the code
@@ -18,7 +22,9 @@ let $builtinmodule = function (name) {
         
         let severusFunctionParameters = "";
 
+        //add commas to parameters for the function
         functionList[i].parameters.forEach(function(element, index, array) {
+
             // add a comma if its not the last element in the parameters array
             severusFunctionParameters+=`Sk.ffi.remapToJs(${element})`;
 
@@ -29,6 +35,7 @@ let $builtinmodule = function (name) {
 
         let severusFunctionCall = `${functionList[i].severusName}(${severusFunctionParameters})`;
 
+        //determine the type of function (for which helper function should be called)
         if(functionList[i].type === "Promise")
             code += generatePromiseFunction(functionList[i].skulptName, functionList[i].parameters, severusFunctionCall);
         else
@@ -46,6 +53,9 @@ let $builtinmodule = function (name) {
 
 }
 
+//=============================== HELPER FUNCTIONS ============================================================
+
+//helper function that returns a skulpt code string for an individual promise function
 function generatePromiseFunction(promiseName, promiseParam, severusFunctionCall)
 {
 
@@ -74,6 +84,7 @@ function generatePromiseFunction(promiseName, promiseParam, severusFunctionCall)
     return promise;
 }
 
+//helper function that returns a skulpt code string for an individual return function
 function generateReturnFunction(returnName, returnParam, severusFunctionCall)
 {
     return `

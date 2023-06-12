@@ -1,3 +1,9 @@
+/*
+    The main bulk of the javascript code. 
+    Directly handles things that interact with HTML elements 
+    Imports separate files for code generation
+*/
+
 import './index.css';
 import {generateCode} from './codeGenerator.js';
 import { convertToXML, convertFromXML } from './xmlGenerator';
@@ -466,7 +472,7 @@ function updateArgumentDescByIndex(index)
     currentDiv.children[2].value = currentParamData[index].description;
 }
 
-//for when a parameter is deleted; updates the index ordering of the parameters
+//for when a parameter is deleted; updates the index ordering of the argument description for all parameters
 function updateAllArgumentDesc()
 {
     for(let i = 0; i < argumentDescription.children.length; i++)
