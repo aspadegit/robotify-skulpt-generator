@@ -430,11 +430,6 @@ function deleteParameter(divToDelete, index)
         currentParamData.splice(index, 1);
         exampleParameters.splice(index, 1);
 
-        //update things that rely on parameters
-        updateAllArgumentDesc();
-        updateExample();
-        updateCommandText();
-
         //update all the remaining stuff that wasn't deleted
         for(let i = 0; i < currentParamList.length; i++)
         {
@@ -445,6 +440,11 @@ function deleteParameter(divToDelete, index)
             currentDiv.children[2].onclick = function() { deleteParameter(currentDiv, i) };
             
         }
+
+        //update things that rely on parameters
+        updateAllArgumentDesc();
+        updateExample();
+        updateCommandText();
 
         return true;
     }
@@ -512,9 +512,16 @@ function updateAllArgumentDesc()
         let currentDiv = argumentDescription.children[i];
         currentDiv.id = "argument" + i;
         currentDiv.children[0].value = `<strong>${currentParamData[i].name}</strong>:`;
+
+        //type
         currentDiv.children[1].value = currentParamData[i].type;
+        currentDiv.children[1].id = "argTypeInput"+i;
+
+        //description
         currentDiv.children[2].value = currentParamData[i].description;
-    
+        currentDiv.children[2].id = "argDescInput"+i;
+
+        
     }
 }
 
