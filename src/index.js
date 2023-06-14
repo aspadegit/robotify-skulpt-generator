@@ -770,7 +770,7 @@ const exampleParamInputHandler = function(e) {
 
     let index = parseInt(e.target.id.substring(17));
     
-    let value = e.target.value.replace(regex, "_");
+    let value = e.target.value;
     e.target.value = value;  
 
     //avoids accidentally pushing an extra value
