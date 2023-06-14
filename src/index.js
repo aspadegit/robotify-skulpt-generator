@@ -433,7 +433,8 @@ function deleteParameter(divToDelete, index)
         //update things that rely on parameters
         updateAllArgumentDesc();
         updateExample();
-        
+        updateCommandText();
+
         //update all the remaining stuff that wasn't deleted
         for(let i = 0; i < currentParamList.length; i++)
         {
