@@ -22,7 +22,7 @@ const commandText = document.getElementById("commandText");
 const exampleText = document.getElementById("exampleText");
 const functionDescription = document.getElementById("functionDescription");
 
-const regex = /[^a-zA-Z0-9_]+/g;
+const regex = /[^a-zA-Z0-9_.]+/g;
 
 var currentCode = "";
 var editingPreviousName = ""; //for use when saving a function while editing
@@ -685,7 +685,7 @@ fileNameInput.addEventListener('propertychange', fileNameInputHandler); //IE8
 
 //when the user types in a new project name, the code is updated
 const projectNameInputHandler = function(e) {
-    projectNameInput.value = projectNameInput.value.replace(regex, "_");
+    projectNameInput.value = projectNameInput.value;
     unsaved = true;
 }
 projectNameInput.addEventListener('input', projectNameInputHandler);
