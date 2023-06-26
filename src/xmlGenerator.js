@@ -45,6 +45,9 @@ export function convertFromXML(xmlString)
     const parser = new DOMParser();
     const xml = parser.parseFromString(xmlString, "application/xml");
 
+    if(xml.getElementsByTagName("skulptGenerator").length == 0)
+        return null;
+
     //file & project names
     let file = getInnerText(xml, "file");
     let project = getInnerText(xml, "project");

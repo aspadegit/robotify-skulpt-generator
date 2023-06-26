@@ -663,6 +663,47 @@ function savePage()
     return true;
 }
 
+//loads the page from an XML file
+function loadPage(file)
+{
+    var reader = new FileReader();
+    reader.readAsText(file, "UTF-8");
+    reader.onload = function (e) {
+
+        //gets the page obj file with this function (from xmlGenerator.js)
+        let skulptObj = convertFromXML(e.target.result);
+
+        //loaded wrong file
+        if(skulptObj == null)
+        {
+            alert('XML is not a Skulpt Generator file. Unable to load.');
+        }
+        //loaded correctly
+        else
+        {
+            //clear fields in preparation for loading
+            clearAll();
+
+            fileNameInput.value = skulptObj.fileName;
+            projectNameInput.value = skulptObj.projectName;
+            
+            //functions
+            functionList = skulptObj.functionList;
+            for(let i = 0; i < functionList.length; i++)
+            {
+                //append the function to the dropdown
+                var newOption = document.createElement("option");
+                newOption.text = functionList[i].skulptName;
+                newOption.value = JSON.stringify(functionList[i]);
+                functionDropdown.appendChild(newOption);
+
+            }
+
+            updateGeneratedCode();        
+        }
+    }
+}
+
 //copies text to the clipboard; used for generated code
 function copyText(id)
 {
@@ -794,6 +835,28 @@ const exampleParamInputHandler = function(e) {
 
 }
 
+//dragging and dropping for loading a file
+const dropZone = document.getElementById("dropZone");
+dropZone.addEventListener('drop', (ev)=> {
+
+    ev.preventDefault();
+
+    if (ev.dataTransfer.items) {
+        // Use DataTransferItemList interface to access the file(s)
+        [...ev.dataTransfer.items].forEach((item, i) => {
+          // If dropped items aren't files, reject them
+          if (item.kind === "file") {
+            const file = item.getAsFile();
+            loadPage(file);
+
+          }
+        });
+      } 
+});
+dropZone.addEventListener('dragover', (event)=> {
+    event.preventDefault();
+});
+
 //for loading from a file
 const loader = document.getElementById('loadButton');
 loader.addEventListener('change', (event) => {
@@ -804,37 +867,11 @@ loader.addEventListener('change', (event) => {
   //reads the content of the file the user loaded
   if(fileList.length > 0)
   {
-    var reader = new FileReader();
-    reader.readAsText(fileList[0], "UTF-8");
-    reader.onload = function (e) {
 
-        //gets the page obj file with this function (from xmlGenerator.js)
-        let skulptObj = convertFromXML(e.target.result);
-
-        //clear fields in preparation for loading
-        clearAll();
-
-        fileNameInput.value = skulptObj.fileName;
-        projectNameInput.value = skulptObj.projectName;
-        
-        //functions
-        functionList = skulptObj.functionList;
-        for(let i = 0; i < functionList.length; i++)
-        {
-            //append the function to the dropdown
-            var newOption = document.createElement("option");
-            newOption.text = functionList[i].skulptName;
-            newOption.value = JSON.stringify(functionList[i]);
-            functionDropdown.appendChild(newOption);
+    loadPage(fileList[0]);
+    //reset the loader
+    loader.value = "";
     
-        }
-
-        updateGeneratedCode();
-
-        //reset the loader
-        loader.value = "";
-
-    }
   }
 
 });

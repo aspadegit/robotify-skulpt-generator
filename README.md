@@ -24,6 +24,9 @@ To build, use `npm run build`.
 - The **Example** section allows you to write in example values for each of the parameters.
 - The `Save Function` button saves all the fields as an object and stores it in the function list.
 - The `Cancel Function` button cancels all edits of the function, and does not save the function if it is a new function.
+- The `Save/Generate Skulpt` button at the top of the page will convert the data in the page to XML and save it using the file name you created.
+- The `Load Skulpt` button at the top of the page will open the file explorer to allow you to select an XML file to load in previously created data.
+    >**NOTE**: You can also load any XML file by dragging and dropping it anywhere on the page.
 
 ## Additional Notes
 - Reloading the page will create a fresh skulpt file
