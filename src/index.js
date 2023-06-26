@@ -473,9 +473,12 @@ function addArgumentDescription(index)
     typeInput.addEventListener('propertychange', argumentTypeInputHandler); //IE8
 
     //input for the parameter's description
-    var descInput = document.createElement("input");
+    var descInput = document.createElement("textarea");
+    descInput.setAttribute("cols", "43");
     descInput.setAttribute("placeholder", "Description of parameter");
+    
     descInput.id = "argDescInput"+index;
+
     //description event listeners
     descInput.addEventListener('input', argumentDescriptionInputHandler);
     descInput.addEventListener('propertychange', argumentDescriptionInputHandler); //IE8
@@ -484,6 +487,7 @@ function addArgumentDescription(index)
     var containerDiv = document.createElement("div");
     containerDiv.appendChild(paramName);
     containerDiv.appendChild(typeInput);
+    containerDiv.appendChild(document.createElement("br"));
     containerDiv.appendChild(descInput);
 
     //style the div
@@ -501,7 +505,7 @@ function updateArgumentDescByIndex(index)
     let currentDiv = document.getElementById("argument"+index);
     currentDiv.children[0].value = `<strong>${currentParamData[index].name}</strong>:`;
     currentDiv.children[1].value = currentParamData[index].type;
-    currentDiv.children[2].value = currentParamData[index].description;
+    currentDiv.children[3].value = currentParamData[index].description;
 }
 
 //for when a parameter is deleted; updates the index ordering of the argument description for all parameters
@@ -518,8 +522,8 @@ function updateAllArgumentDesc()
         currentDiv.children[1].id = "argTypeInput"+i;
 
         //description
-        currentDiv.children[2].value = currentParamData[i].description;
-        currentDiv.children[2].id = "argDescInput"+i;
+        currentDiv.children[3].value = currentParamData[i].description;
+        currentDiv.children[3].id = "argDescInput"+i;
 
         
     }
@@ -769,7 +773,6 @@ const argumentDescriptionInputHandler = function(e) {
     let index = parseInt(e.target.id.substring(12));
     currentParamData[index].description = e.target.value;
     unsaved = true;
-
 }
 
 //for whenever an individual field in the example parameters is changed
