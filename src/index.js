@@ -321,12 +321,6 @@ function checkEmptyFields(newFunction)
         
         if(newFunction.parameterData[i].description === "")
             return "parameter " + i + "'s description";
-
-        if(newFunction.exampleParam[i] === "")
-            return "example parameter " + i;
-        
-        if(newFunction.exampleParam.length != newFunction.parameters.length)
-            return "at least one of the example parameters";
     }
 
     if(newFunction.description === "")

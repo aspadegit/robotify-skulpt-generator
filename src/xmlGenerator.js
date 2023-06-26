@@ -194,7 +194,10 @@ function xmlToFunction(xml, currentFunction)
     let xmlExampleParam = children[5].childNodes;
     for(let i = 0; i < xmlExampleParam.length; i++)
     {
-        functionObj.exampleParam.push(xmlExampleParam[i].firstChild.nodeValue);
+        if(xmlExampleParam[i].firstChild == null || xmlExampleParam[i].firstChild.nodeValue == null)
+            functionObj.exampleParam.push("");
+        else
+            functionObj.exampleParam.push(xmlExampleParam[i].firstChild.nodeValue);
     }
 
     return functionObj;
