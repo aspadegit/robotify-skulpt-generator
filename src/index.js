@@ -564,7 +564,7 @@ function updateExample()
     {
         let newInput = document.createElement("input");
         newInput.id = "exampleParamInput" + i;
-        newInput.setAttribute("size", "5");
+        newInput.setAttribute("size", "8");
 
         //checking if they already had some values in there
         if(exampleParameters != null)
