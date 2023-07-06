@@ -21,6 +21,7 @@ const argumentDescription = document.getElementById("argumentDescription");
 const commandText = document.getElementById("commandText");
 const exampleText = document.getElementById("exampleText");
 const functionDescription = document.getElementById("functionDescription");
+const severusFunctionCalls = document.getElementById("severusFunctionCalls");
 
 const regex = /[^a-zA-Z0-9_.]+/g;
 
@@ -74,7 +75,7 @@ function saveFunction()
     //create the function
     let newFunction = {
         skulptName: skulptNameInput.value,
-        severusName: severusNameInput.value,
+        severusName: getSeverusName(selectedType),
         parameters: currentParamList,
         parameterData: currentParamData,
         type: selectedType,
@@ -144,6 +145,7 @@ function saveFunction()
 //edits a function in the dropdown & returns whether it successfully loaded the edit
 function editFunction()
 {
+    clearFunctionInfo();
     //the dropdown is empty / there are no functions to edit
     if(functionDropdown.options.length < 1)
         return false;
@@ -160,13 +162,19 @@ function editFunction()
 
     //update all the associated fields...
     skulptNameInput.value = selectedFunction.skulptName;
-    severusNameInput.value = selectedFunction.severusName;
     functionDescription.value = selectedFunction.description;
 
+    //set dropdown selection
     if(selectedFunction.type === "Promise")
         typeDropdown.selectedIndex = 0;
-    else
+    else if(selectedFunction.type === "Return")
         typeDropdown.selectedIndex = 1;
+    else
+        typeDropdown.selectedIndex = 2;
+
+    //update which div should be visible & the name
+    setSeverusDivVisibility(typeDropdown.options[typeDropdown.selectedIndex].text);
+    setSeverusName(selectedFunction.type, selectedFunction.severusName);
 
     //remove all the parameters and then add them back (to avoid dupes)
     paramListDiv.innerHTML = "";
@@ -269,12 +277,15 @@ function clearFunctionInfo()
     editingPreviousName = "";
     skulptNameInput.value = "";
     severusNameInput.value = "";
+    severusFunctionCalls.value = "";
     typeDropdown.selectedIndex = 0;
     paramListDiv.innerHTML = "";
     argumentDescription.innerHTML = "";
     functionDescription.value = "";
     commandText.innerHTML = "No name given";
     exampleText.innerHTML = "No name given";
+
+    setSeverusDivVisibility("Promise");
 }
 
 //sets everything on the bottom half of the screen to be invisible
@@ -308,9 +319,12 @@ function checkEmptyFields(newFunction)
     if(skulptNameInput.value === "")
         return "the skulpt function name";
     
-    if(severusNameInput.value === "")
+    if(newFunction.type != "Promise & Return" && severusNameInput.value == "")
         return "the severus function name";
     
+    if(newFunction.type === "Promise & Return" && severusFunctionCalls.value == "")
+        return "the severus function calls";
+
     for(let i = 0; i < newFunction.parameters.length; i++)
     {
         if(newFunction.parameters[i] === "")
@@ -698,6 +712,47 @@ function loadPage(file)
     }
 }
 
+//since severus name could be one of two types, return the one based on the dropdown type
+function getSeverusName(type)
+{
+    if(type == "Promise & Return")
+    {
+        return severusFunctionCalls.value;
+    }
+
+    return severusNameInput.value;
+}
+
+//for loading, same reasons as getSeverusName
+function setSeverusName(type, text)
+{
+    severusFunctionCalls.value = "";
+    severusNameInput.value = "";
+    
+    if(type == "Promise & Return")
+    {
+        severusFunctionCalls.value = text;
+    }
+
+    severusNameInput.value = text;
+}
+
+//chooses whether to show "severus function name" input field or "severus function calls" textarea
+function setSeverusDivVisibility(typeVisible)
+{
+    //note about the abbreviation: pr = promiseReturn
+    if(typeVisible == "Promise & Return")
+    {
+        document.getElementById("prSeverusDiv").hidden = false;
+        document.getElementById("severusDiv").hidden = true;
+    }
+    else
+    {
+        document.getElementById("prSeverusDiv").hidden = true;
+        document.getElementById("severusDiv").hidden = false;
+    }
+}
+
 //copies text to the clipboard; used for generated code
 function copyText(id)
 {
@@ -869,3 +924,12 @@ loader.addEventListener('change', (event) => {
   }
 
 });
+
+//update what is visible for the severus name in the case of Promise-Return functions
+typeDropdown.addEventListener('change', (event) => {
+    
+    setSeverusDivVisibility(event.target.value);
+    unsaved = true;
+
+});
+

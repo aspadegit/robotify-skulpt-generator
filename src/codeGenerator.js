@@ -36,8 +36,10 @@ export function generateCode(fileName, functionList)
         //determine the type of function (for which helper function should be called)
         if(functionList[i].type === "Promise")
             code += generatePromiseFunction(functionList[i].skulptName, functionList[i].parameters, severusFunctionCall);
-        else
+        else if(functionList[i].type === "Return")
             code += generateReturnFunction(functionList[i].skulptName, functionList[i].parameters, severusFunctionCall);
+        else
+            code += generatePromiseReturnFunction(functionList[i].skulptName, functionList[i].parameters, functionList[i].severusName);
     }
 
     // string that is necessary for the end of the skulpt file
@@ -89,6 +91,33 @@ function generateReturnFunction(returnName, returnParam, severusFunctionCall)
 
         Sk.builtin.pyCheckArgsLen("${returnName}", ${returnParam.length}, ${returnParam.length}, ${returnParam.length});
         return Sk.ffi.remapToPy(${severusFunctionCall});
+    });
+`;
+}
+
+//helper function that returns a skulpt code string for an individual promiseReturn function
+    //pr is short for promiseReturn
+function generatePromiseReturnFunction(prName, prParam, promiseLine)
+{
+    return `
+    mod.${prName} = new Sk.builtin.func(function ${prName}(${prParam.toString()}) {
+
+        let susp = new Sk.misceval.Suspension();
+        Sk.builtin.pyCheckArgsLen("${prName}", ${prParam.length}, ${prParam.length}, ${prParam.length});
+        susp.resume = function () {
+            if (susp.data["error"]) {
+                    throw new Sk.builtin.IOError(susp.data["error"].message);
+            } else {
+                    return new Sk.builtin.int_(susp.data["result"]);
+            }
+        };
+
+        susp.data = {
+            type: "Sk.promise",
+            promise: ${promiseLine}
+        };
+
+        return susp;
     });
 `;
 }

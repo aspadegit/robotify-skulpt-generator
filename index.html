@@ -70,12 +70,22 @@
           <div class="genColumn functionDependent">
             <h4>Skulpt Function Name</h4>
             <input id="skulptNameInput" type="text">
-            <h4>Severus Function Name</h4>
-            <input id="severusNameInput" type="text">
+
+            <div id="severusDiv">
+              <h4>Severus Function Name</h4>
+              <input id="severusNameInput" type="text">
+            </div>
+
+            <div hidden="true" id="prSeverusDiv">
+              <h4>Severus Function Calls</h4>
+              <textarea wrap="off" cols=30 rows=1 id="severusFunctionCalls"></textarea>
+            </div>
+
             <h4>Type</h4>
             <select id="typeDropdown">
               <option>Promise</option>
               <option>Return</option>
+              <option>Promise & Return</option>
             </select>
 
             <br><br>           
