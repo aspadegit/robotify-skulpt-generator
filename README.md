@@ -16,6 +16,7 @@ To build, use `npm run build`.
     - All fields available are required for this section
 - The **Skulpt Function Name** and **Severus Function Name** sections are for the Skulpt and Severus names respectively. 
 - The **Type** section contains a dropdown that allows you to select between a Promise function and a Return function.
+    > **NOTE**: When selecting `Promise & Return` as your type, the **Severus Function Name** section will change to **Severus Function Calls.** This does not autogenerate wrappers / casting of the variables & functions located in the `promise:` section, and must be entered manually.
 - The **Parameters** section contains an `Add Parameters` button. You can click it to add a new parameter. Parameters each contain a `Delete` button, as well, to delete them.
 - The **Argument Description** section contains fields for the types and descriptions of each parameter.
     >**NOTE**: Parentheses around the type are added automatically in the variable storage, so do not add them manually (they will be converted to underscores).
